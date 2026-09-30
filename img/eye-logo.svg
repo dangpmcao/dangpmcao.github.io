@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="eye" x1="8" y1="12" x2="56" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#75d5ff"/>
+      <stop offset=".48" stop-color="#2488d8"/>
+      <stop offset="1" stop-color="#0a3d78"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="42%" cy="35%" r="65%">
+      <stop stop-color="#b9f2ff"/>
+      <stop offset=".35" stop-color="#3db7f2"/>
+      <stop offset="1" stop-color="#07529b"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#061f3b"/>
+  <path d="M7 32c6.8-11 15.1-16.5 25-16.5S50.2 21 57 32c-6.8 11-15.1 16.5-25 16.5S13.8 43 7 32Z" fill="none" stroke="url(#eye)" stroke-width="4"/>
+  <circle cx="32" cy="32" r="11.5" fill="url(#iris)" stroke="#8be1ff" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="5" fill="#03172c"/>
+  <circle cx="28.5" cy="27.5" r="2.2" fill="#e9fbff"/>
+  <path d="M32 8v5M32 51v5M8 20l5 3M51 41l5 3M8 44l5-3M51 23l5-3" stroke="#39a9e8" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+  <path d="M19 32h5m16 0h5M32 19v5m0 16v5" stroke="#d7f7ff" stroke-width="1" opacity=".55"/>
+</svg>
