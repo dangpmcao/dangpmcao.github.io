@@ -57,7 +57,7 @@ sections.forEach(section => observer.observe(section));
 if (starField && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const stars = document.createDocumentFragment();
 
-  for (let index = 0; index < 30; index += 1) {
+  for (let index = 0; index < 18; index += 1) {
     const star = document.createElement('span');
     star.className = 'star';
     star.style.left = `${4 + Math.random() * 92}%`;
