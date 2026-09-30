@@ -1,7 +1,7 @@
 :root { --navy:#0b3158; --blue:#1f6094; --ink:#172634; --muted:#647383; --line:#d7e2e9; --soft:#f5f9fc; --white:#fff; }
 * { box-sizing:border-box; }
 html { scroll-padding-top:82px; }
-body { margin:0; color:var(--ink); background:var(--white); font-family:Georgia,"Times New Roman",serif; line-height:1.7; }
+body { margin:0; color:var(--ink); background:var(--white); font-family:"Latin Modern Roman","Computer Modern",serif; line-height:1.7; }
 a { color:inherit; text-decoration:none; }
 .shell { width:min(1040px,calc(100% - 48px)); margin-inline:auto; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
@@ -16,8 +16,8 @@ a { color:inherit; text-decoration:none; }
 .menu-button span:not(.sr-only) { display:block; width:23px; height:2px; margin:5px; background:white; }
 .hero { min-height:620px; display:grid; grid-template-columns:285px 1fr; gap:78px; align-items:center; padding-block:90px; }
 .profile-column { align-self:center; }
-.portrait { width:285px; height:350px; margin:0; overflow:hidden; background:var(--soft); border:1px solid var(--line); }
-.portrait img { width:100%; height:100%; display:block; object-fit:cover; object-position:50% 34%; }
+.portrait { width:285px; margin:0; overflow:hidden; background:var(--soft); border:1px solid var(--line); }
+.portrait img { width:100%; height:auto; aspect-ratio:1; display:block; object-fit:contain; }
 .contact-links { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); border-top:0; }
 .contact-links a { display:flex; min-width:0; padding:13px 4px 10px; flex-direction:column; align-items:center; gap:3px; color:var(--blue); border-right:1px solid var(--line); font-size:.65rem; }
 .contact-links a:last-child { border-right:0; }
@@ -51,7 +51,7 @@ h1 { margin:11px 0 25px; color:var(--navy); font-size:clamp(2.7rem,5vw,4.4rem); 
 .pub-links { display:flex; gap:18px; margin-top:10px; }
 .pub-links a { color:var(--blue); font-size:.77rem; font-weight:bold; }
 .pub-links a:hover { text-decoration:underline; }
-.thoughts { min-height:420px; }
+.blogs { min-height:420px; }
 .posts { min-height:150px; border-top:1px solid var(--line); }
 footer { background:var(--navy); color:#d1dfeb; }
 .footer-inner { min-height:96px; display:flex; align-items:center; justify-content:space-between; font-size:.77rem; }
