@@ -1,0 +1,346 @@
+\documentclass[a4paper,10pt]{article}
+
+% =============================================================================
+% Clean academic CV inspired by a conventional research-resume layout
+% =============================================================================
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[top=0.55in,bottom=0.60in,left=0.65in,right=0.65in]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{fontawesome5}
+\usepackage{microtype}
+\usepackage{array}
+
+\definecolor{linkblue}{HTML}{0000AA}
+\hypersetup{
+  colorlinks=true,
+  urlcolor=linkblue,
+  linkcolor=linkblue,
+  pdfauthor={Cao Pham Minh Dang},
+  pdftitle={Curriculum Vitae - Cao Pham Minh Dang}
+}
+
+\pagestyle{empty}
+\raggedbottom
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{0pt}
+\urlstyle{same}
+
+% =============================================================================
+% Section styling: simple heading + thin rule
+% =============================================================================
+\titleformat{\section}
+  {\large\bfseries\scshape}
+  {}{0pt}{}
+  [\vspace{-0.08em}\titlerule]
+\titlespacing*{\section}{0pt}{0.72em}{0.35em}
+
+% =============================================================================
+% Lists
+% =============================================================================
+\setlist[itemize,1]{
+  leftmargin=0.95em,
+  label=\textbullet,
+  topsep=1.5pt,
+  itemsep=1.5pt,
+  parsep=0pt,
+  partopsep=0pt
+}
+\setlist[itemize,2]{
+  leftmargin=1.25em,
+  label=\textopenbullet,
+  topsep=0.5pt,
+  itemsep=0.6pt,
+  parsep=0pt,
+  partopsep=0pt
+}
+
+% =============================================================================
+% Reusable entry helpers
+% =============================================================================
+\newcommand{\resumeHeading}[4]{%
+  \begin{tabularx}{\textwidth}[t]{%
+    @{}>{\raggedright\arraybackslash}X
+    >{\raggedleft\arraybackslash}p{0.24\textwidth}@{}%
+  }
+    \textbf{#1} & \textit{#2} \\
+    \textit{#3} & #4
+  \end{tabularx}%
+}
+\newcommand{\awardHeading}[2]{%
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{0.13\textwidth}@{}}
+    \textbf{#1} & \textit{#2}
+  \end{tabularx}%
+}
+
+% ── Honor/Award entry ─────────────────────────────────────────────────────────
+\newcommand{\honorEntry}[4]{%
+  \item
+  \noindent
+  \textbf{#1} --- #2
+  \hfill \textit{#3}\\[-1pt]
+  {\small #4}
+}
+
+\newcommand{\projectHeading}[3]{%
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X r@{}}
+    \textbf{#1} #2 & \textit{#3}
+  \end{tabularx}%
+}
+
+\newcommand{\smalllink}[2]{\href{#1}{\textcolor{linkblue}{#2}}}
+
+% Publication format: [C.n] citation body
+\newcommand{\pub}[2]{%
+  \noindent\begin{tabularx}{\textwidth}{@{}p{0.055\textwidth} X@{}}
+    \textbf{[#1]} & #2
+  \end{tabularx}\vspace{0.38em}
+}
+
+\begin{document}
+
+% =============================================================================
+% Header
+% =============================================================================
+\begin{center}
+  {\LARGE\bfseries Cao Pham Minh Dang}\\[0.35em]
+  (+84) 708 782 448 \;|\;
+  \href{mailto:24dang.cpm@vinuni.edu.vn}{24dang.cpm@vinuni.edu.vn} \;|\;
+  Hanoi, Vietnam\\[0.18em]
+  \href{https://www.linkedin.com/in/cphmdang/}{\faLinkedin\, cphmdang}
+\;|\;
+\href{https://github.com/minhdang050806}{\faGithub\, minhdang050806}
+\;|\;
+\href{https://scholar.google.com/citations?user=pt-eC-8AAAAJ\&hl=en}
+{\faGraduationCap\, Google Scholar}
+\end{center}
+\vspace{-0.25em}
+
+% =============================================================================
+% Research interests
+% =============================================================================
+\section{Research Interests}
+My research interests lie in 3D/4D computer vision and medical image analysis, particularly spatiotemporal reconstruction, geometry-aware representation learning, and healthcare digital twins. I am interested in learning anatomical structure and dynamics from sparse or multimodal observations using mesh-based and implicit representations, with broader interests in robust and generalizable visual learning.
+% =============================================================================
+% Education
+% =============================================================================
+\section{Education}
+
+\begin{itemize}
+
+  \item \resumeHeading
+    {VinUniversity}
+    {Expected Jun 2028}
+    {B.S. in Data Science}
+    {Hanoi, Vietnam}
+    \begin{itemize}
+      \item \textbf{CGPA:} 3.78/4.0
+      \;|\;
+      \textbf{Merit Scholarship:} 85\% tuition coverage
+      (approximately USD~\$119,000 over four years).
+
+      \item \textbf{Dean's List:} All completed semesters
+      \;|\;
+      Top 10\% of VinUniversity students.
+
+      \item \textbf{Relevant Coursework:}
+      Object-Oriented Programming \& Data Structures (A),
+      Data Science Programming (A),
+      Probability \& Statistics (A),
+      Linear Algebra (A),
+      Databases and Database Systems (A).
+    \end{itemize}
+
+  \item \resumeHeading
+    {Hong Kong University of Science and Technology (HKUST)}
+    {Fall 2026}
+    {Exchange Student}
+    {Hong Kong SAR}
+
+\end{itemize}
+
+% =============================================================================
+% Research experience
+% =============================================================================
+\section{Research Experience}
+\begin{itemize}
+    \item \resumeHeading
+        {Medical AI Lab, The University of Hong Kong \smalllink{https://hku-medai.github.io/}{[Lab]}}
+        {Sep 2026 -- Present}
+        {Research Intern -- Medical AI \& Multimodal World Models}
+        {Hong Kong}
+        \begin{itemize}
+          \item Supervised by Asst. Prof. \href{https://yulequan.github.io/}{Lequan Yu}; collaborating with Dr. Dingkun Liu on patient-specific medical world models.
+          \item Developing phase-aware cardiac CT--3D ultrasound registration across LV- and RV-view acquisitions, including candidate-pair selection, signed-distance-field-guided rigid alignment, and regularized B-spline deformable refinement.
+          \item Evaluated five-structure registration with Dice, ASSD, and HD95.
+        \end{itemize}
+    
+  \item \resumeHeading
+    {Computer Vision and Medical AI Lab (CVMAIL), VinUniversity \smalllink{https://cvlab.vinuni.edu.vn/}{[Lab]}}
+    {May 2025 -- Present}
+    {Undergraduate Research Assistant -- Medical AI}
+    {Hanoi, Vietnam}
+    \begin{itemize}
+      \item Supervised by Asst. Prof. \href{https://vinuni.edu.vn/vi/people/ts-pham-huy-hieu/}{Pham Huy Hieu} and Asst. Prof. \href{https://scholar.google.com/citations?hl=en&user=--CYiuwAAAAJ}{Lei Li} (Digital Heart Lab, NUS).
+      \item Investigating observability and ambiguity in sparse-view 3D/4D cardiac shape reconstruction, with a focus on determining which anatomical structures can be reliably recovered from limited imaging observations.
+    \end{itemize}
+
+  \item \resumeHeading
+    {Medical Meal Plan Agentic Recommendation}
+    {Oct 2025 -- August 2026}
+    {Undergraduate Research Assistant -- Medical AI}
+    {Hanoi, Vietnam}
+    \begin{itemize}
+      \item Supervised by Asst. Prof. \href{https://vinuni.edu.vn/people/huynh-thanh-trung/}{Huynh Thanh Trung}.
+      \item Designed and implemented an agentic AI framework comprising a simulated user agent, a retrieval-augmented meal generation agent, and a physician-in-the-loop decision agent.
+      \item Awarded the \textbf{CECS Student Research Grant Program} -- up to \textbf{USD \$2,700}.
+    \end{itemize}
+
+  \item \resumeHeading
+    {AI4LIFE Lab, Hanoi University of Science and Technology \smalllink{https://ai4life.hust.edu.vn/}{[Lab]}}
+    {Dec 2024 -- Dec 2025}
+    {Undergraduate Research Assistant -- Environmental AI}
+    {Hanoi, Vietnam}
+    \begin{itemize}
+      \item Supervised by Assoc. Prof. \href{https://soict.hust.edu.vn/pgs-ts-nguyen-phi-le.html}{Nguyen Phi Le}.
+      \item Fine-tuned \textbf{U-Net} with a Vision Transformer backbone for satellite land-use segmentation; customised \textbf{YOLO}, \textbf{CSRNet}, and \textbf{SafeCount} for Vietnamese traffic vehicle detection and counting \smalllink{https://github.com/minhdang-DS/Effective-Vehicles-Counting}{[GitHub]}.
+      \item Presented at \href{https://cei.vinuni.edu.vn/event/airpact-vietnam-2025-smart-air-smart-cities-digital-solutions-for-vietnams-future/}{AIRPACT VIETNAM 2025}, a leading Environmental AI conference in Vietnam \smalllink{https://drive.google.com/file/d/1FPkDptyoXVDPkie9rDv4Knd82tYMI50a/view?usp=sharing}{[Poster]}.
+    \end{itemize}
+\end{itemize}
+
+% =============================================================================
+% Publications
+% =============================================================================
+\section{Publications}
+
+\pub{W.1}{
+\textbf{Dang P. M. Cao}, H. D. Pham, H. Pham.
+\textit{When Oracle Conditioning Misleads Deployment: Conditioning-Availability Bias in Echocardiographic Segmentation.}
+\textbf{FAIMI Workshop at MICCAI 2026}. \smalllink{https://arxiv.org/abs/2608.03342}{[paper]}\smalllink{https://github.com/minhdang050806/Oracle-Conditioning-Bias-in-Echocardiographic-Segmentation}{[code]}
+}
+
+\pub{W.2}{
+\textbf{Dang P. M. Cao}, H. Pham.
+\textit{When Measurement Conventions Masquerade as Calibration Gains in Cardiac Digital Twins.}
+\textbf{DT4H Workshop at MICCAI 2026}. \smalllink{https://arxiv.org/abs/2608.01602}{[paper]}\smalllink{https://github.com/minhdang050806/Ejection-Fraction-Bias-in-Cardiac-Digital-Twin}{[code]}
+}
+
+\pub{W.3}{
+Hieu D. Pham, \textbf{Dang P. M. Cao}, Thanh Trung Huynh.
+\textit{Beyond Uncertainty: Generalizable Failure Monitoring for Surgical Segmentation under Acquisition Degradation.}
+\textbf{UNSURE Workshop at MICCAI 2026}. \smalllink{https://arxiv.org/pdf/2608.16748}{[paper]}
+}
+
+\pub{W.4}{
+Ha-Hieu Pham, \textbf{Dang P. M. Cao (Co-first)}, Minh Hoang Pham, Khanh Nguyen Vo Ngoc,
+Thanh-Huy Nguyen, Ulas Bagci, Hieu Pham.
+\textit{Asymmetric Paired-Annotation Learning for Multi-Structure ULF Pediatric Brain MRI Segmentation.}
+\textbf{LISA Challenge at MICCAI 2026}. \smalllink{https://arxiv.org/pdf/2609.02210}{[paper]}
+}
+
+% =============================================================================
+% Honors and awards
+% =============================================================================
+\section{Honors and Awards}
+
+\begin{itemize}
+
+  \honorEntry
+    {3rd Prize}
+    {HSIL Hackathon 2026
+    \smalllink{https://hsph.harvard.edu/research/health-systems-innovation-lab/work/hsil-hackathon-2026-building-high-value-health-systems-leveraging-ai/}{[Link]}}
+    {2026}
+    {3rd out of 41 teams. Developed an AI framework for early cardiovascular disease detection from fetal ultrasound imaging (Team VinCota).}
+
+  \honorEntry
+    {Consolation Prize}
+    {North Region AI Olympiad
+    \smalllink{https://www.olp.vn/olympic-ai-sinh-vi\%C3\%AAn}{[Link]}}
+    {2025}
+    {Developed the solution for the Video Hand Gesture Classification task (Team VinDataHub).}
+
+  \honorEntry
+    {5th Place}
+    {MICCAI STSR 2025: Teeth \& Root Canal Segmentation
+    \smalllink{https://www.codabench.org/competitions/6468/}{[Link]}}
+    {2025}
+    {Ranked 5th out of 124 teams. Fine-tuned nnU-Net v2 for 3D teeth and pulp-canal segmentation in CBCT
+    \smalllink{https://github.com/minhdang-DS/MICCAI-2025-Tooth-Segmentation-Challenge}{[GitHub]}.}
+
+  \honorEntry
+    {10th Place}
+    {DataFlow 2025, Hanoi University of Science
+    \smalllink{http://mim.hus.vnu.edu.vn/dataflow/}{[Link]}}
+    {2025}
+    {Ranked 10th out of 60 teams. Developed revenue-forecasting models using SARIMAX, LSTM, and Transformers
+    \smalllink{https://github.com/dinhieufam/Forecasting-Business-Performance/tree/master}{[GitHub]}.}
+
+  \honorEntry
+    {Third Prize in Informatics \& Third Prize in Academic English}
+    {Ho Chi Minh City Olympiad}
+    {2023--2024}
+    {}
+
+\end{itemize}
+
+% =============================================================================
+% Leadership / work experience
+% =============================================================================
+\section{Leadership}
+\begin{itemize}
+  \item \resumeHeading
+    {Co-founder \& Head of Academic Department -- \href{https://www.facebook.com/vintelligencevinuni/}{VinTelligence}}
+    {Dec 2024 -- Present}
+    {Student Organization}
+    {Hanoi, Vietnam}
+    \begin{itemize}
+      \item Co-founded a student-led organisation connecting students with interests in Data Science and AI; designed and delivered internal training sessions on Computer Vision.
+      \item Co-organised and authored problem sets for \href{https://www.datathon.site/}{Datathon 2026}, a national Data Science and AI competition attracting \textbf{524 teams} and \textbf{1,774 participants}. This is one of the largest Data Science competitions in Vietnam.
+    \end{itemize}
+\end{itemize}
+
+% =============================================================================
+% Skills
+% =============================================================================
+\section{Skills}
+\begin{itemize}
+  \item \textbf{Programming Languages:} Python, C, C++
+  \item \textbf{Deep Learning:} PyTorch, OpenCV, PIL, TensorFlow
+  \item \textbf{Research Tools:} Git, Linux, LaTeX
+  \item \textbf{Areas:} Computer Vision, Digital Twin for Health, Medical AI
+\end{itemize}
+
+% =============================================================================
+% Certificates
+% =============================================================================
+\section{Certificates}
+\begin{itemize}
+  \item \textbf{IELTS:} 8.0/9.0 
+  \item \textbf{SAT:} 1530/1600
+\end{itemize}
+
+% =============================================================================
+% References
+% =============================================================================
+\section{References}
+\begin{minipage}[t]{0.48\textwidth}
+  \textbf{Dr. Pham Huy Hieu}\\
+  Assistant Professor, College of Engineering and Computer Science, VinUniversity\\
+  Principal Investigator, \href{https://smarthealth.vinuni.edu.vn/}{VinUni-Illinois Smart Health Center}\\
+  \href{mailto:hieu.ph@vinuni.edu.vn}{hieu.ph@vinuni.edu.vn}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+  \textbf{Dr. Huynh Thanh Trung}\\
+  Postdoctoral Researcher, EPFL\\
+  Assistant Professor of Computer Science, VinUniversity\\
+  \href{mailto:trung.ht@vinuni.edu.vn}{trung.ht@vinuni.edu.vn}
+\end{minipage}
+
+\end{document}
