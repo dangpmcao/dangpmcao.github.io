@@ -57,13 +57,13 @@ sections.forEach(section => observer.observe(section));
 if (starField && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const stars = document.createDocumentFragment();
 
-  for (let index = 0; index < 14; index += 1) {
+  for (let index = 0; index < 30; index += 1) {
     const star = document.createElement('span');
     star.className = 'star';
     star.style.left = `${4 + Math.random() * 92}%`;
     star.style.top = `${7 + Math.random() * 86}%`;
     star.style.setProperty('--star-size', `${5 + Math.random() * 7}px`);
-    star.style.setProperty('--star-delay', `${Math.random() * 4}s`);
+    star.style.setProperty('--star-delay', `${Math.random() * 3.2}s`);
     stars.appendChild(star);
   }
 
