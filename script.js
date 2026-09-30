@@ -63,7 +63,8 @@ if (starField && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     star.style.left = `${4 + Math.random() * 92}%`;
     star.style.top = `${7 + Math.random() * 86}%`;
     star.style.setProperty('--star-size', `${5 + Math.random() * 7}px`);
-    star.style.setProperty('--star-delay', `${Math.random() * 3.2}s`);
+    star.style.setProperty('--star-duration', `${5 + Math.random() * 3.5}s`);
+    star.style.setProperty('--star-delay', `${-Math.random() * 8}s`);
     stars.appendChild(star);
   }
 
