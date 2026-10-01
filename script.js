@@ -58,6 +58,7 @@ const revealGroups = [
   ['.timeline-item', 90],
   ['.experience', 80],
   ['.publication', 75],
+  ['.blog-post-card', 0],
   ['.blog-note', 0]
 ];
 
