@@ -55,7 +55,7 @@
       <div class="article-byline">
         <span>By Cao Pham Minh Dang</span>
         <time datetime="2026-10-01">October 1, 2026</time>
-        <span>18 min read</span>
+        <span>24 min read</span>
       </div>
     </header>
 
@@ -214,8 +214,114 @@
       <section id="transformations">
         <h2><span class="section-number">04 / TRANSFORMATIONS</span>Global and local motion models</h2>
 
-        <h3>Rigid transformation</h3>
-        <p>A rigid transformation preserves distances and angles:</p>
+        <p>A transformation model determines which kinds of anatomical change the registration is allowed to express. This choice is not merely computational: it is an assumption about the anatomy. If the model is too restrictive, real motion remains unexplained. If it is too flexible, the optimizer may manufacture implausible correspondences that improve image similarity.</p>
+
+        <div class="concept-grid" aria-label="Transformation model overview">
+          <div class="concept-card">
+            <h4>Translation</h4>
+            <p>Changes position only. Shape, orientation, distance, and volume are preserved.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Rigid</h4>
+            <p>Combines translation and rotation. Appropriate when the object should not deform.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Affine</h4>
+            <p>Adds global scaling and shear. Straight lines remain straight, but shape may change.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Deformable</h4>
+            <p>Allows position-dependent motion. Different anatomical regions can move differently.</p>
+          </div>
+        </div>
+
+        <h3>Translation: the simplest motion</h3>
+        <p>A translation moves every point by the same vector \(\mathbf{t}\). In \(d\) dimensions,</p>
+
+        <div class="math-block">
+          \[
+            \phi_{\mathrm{trans}}(\mathbf{x})=\mathbf{x}+\mathbf{t},
+            \qquad
+            \mathbf{t}=(t_1,\ldots,t_d)^\top.
+          \]
+        </div>
+
+        <p>For a 2-D image, \(\mathbf{t}=(t_x,t_y)^\top\); for a 3-D volume, \(\mathbf{t}=(t_x,t_y,t_z)^\top\). The same displacement is applied at every location, so the vector between any two transformed points is unchanged:</p>
+
+        <div class="math-block">
+          \[
+            \phi(\mathbf{x}_1)-\phi(\mathbf{x}_2)
+            =(\mathbf{x}_1+\mathbf{t})-(\mathbf{x}_2+\mathbf{t})
+            =\mathbf{x}_1-\mathbf{x}_2.
+          \]
+        </div>
+
+        <p>This equality explains why translation preserves distances, angles, shape, and volume. Its inverse is simply \(\phi^{-1}(\mathbf{x})=\mathbf{x}-\mathbf{t}\). Translation is often estimated first—for example, by aligning image centers or centers of mass—because a large initial offset can prevent later optimization from finding the correct overlap.</p>
+
+        <p>The units of \(\mathbf{t}\) must be explicit. A shift of three voxels is not a shift of three millimeters unless the voxel spacing is exactly \(1\,\mathrm{mm}\). For anisotropic volumes, the same index displacement can represent different physical distances along different axes.</p>
+
+        <h3>Rotation: changing orientation</h3>
+        <p>A rotation changes orientation while preserving lengths and handedness. In 2-D, a counterclockwise rotation by angle \(\theta\) about the origin is</p>
+
+        <div class="math-block">
+          \[
+            R(\theta)=
+            \begin{bmatrix}
+              \cos\theta & -\sin\theta\\
+              \sin\theta & \cos\theta
+            \end{bmatrix},
+            \qquad
+            \phi_{\mathrm{rot}}(\mathbf{x})=R(\theta)\mathbf{x}.
+          \]
+        </div>
+
+        <p>The constraints \(R^\top R=I\) and \(\det R=1\) are what make \(R\) a proper rotation. Orthogonality gives \(\|R\mathbf{x}\|_2=\|\mathbf{x}\|_2\), while the positive determinant excludes reflections. The inverse is especially simple: \(R^{-1}=R^\top=R(-\theta)\).</p>
+
+        <p>Three-dimensional rotation has three degrees of freedom. Rotations about the coordinate axes can be written as</p>
+
+        <div class="math-block">
+          \[
+            R_x(\alpha)=
+            \begin{bmatrix}
+              1&0&0\\
+              0&\cos\alpha&-\sin\alpha\\
+              0&\sin\alpha&\cos\alpha
+            \end{bmatrix},
+            \quad
+            R_y(\beta)=
+            \begin{bmatrix}
+              \cos\beta&0&\sin\beta\\
+              0&1&0\\
+              -\sin\beta&0&\cos\beta
+            \end{bmatrix},
+          \]
+          \[
+            R_z(\gamma)=
+            \begin{bmatrix}
+              \cos\gamma&-\sin\gamma&0\\
+              \sin\gamma&\cos\gamma&0\\
+              0&0&1
+            \end{bmatrix}.
+          \]
+        </div>
+
+        <p>A composite Euler rotation might be defined as \(R=R_z(\gamma)R_y(\beta)R_x(\alpha)\). The convention must be documented because 3-D rotations do not commute: in general, \(R_xR_y\ne R_yR_x\). Changing the multiplication order changes the final orientation.</p>
+
+        <h3>The center of rotation</h3>
+        <p>Applying \(R\mathbf{x}\) rotates about the coordinate origin, which is often a corner or scanner-defined point rather than the center of the anatomy. To rotate about a chosen center \(\mathbf{c}\), first move that center to the origin, rotate, and move it back:</p>
+
+        <div class="math-block">
+          \[
+            \phi_{\mathbf{c}}(\mathbf{x})
+            =R(\mathbf{x}-\mathbf{c})+\mathbf{c}
+            =R\mathbf{x}+(I-R)\mathbf{c}.
+          \]
+        </div>
+
+        <p>This is why initialization matters. Even with the correct angle, rotating about the wrong center produces a translation-like error whose magnitude grows with distance from the center.</p>
+
+        <h3>Rigid transformation: rotation plus translation</h3>
+        <p>A rigid transformation combines the two motions while preserving the Euclidean distance between every pair of points:</p>
 
         <div class="math-block">
           \[
@@ -225,20 +331,22 @@
           \]
         </div>
 
-        <p>Here \(R\in SO(d)\) is a rotation, \(\mathbf{t}\) a translation, and \(\mathbf{c}\) the center of rotation. In 2-D,</p>
+        <p>It has three degrees of freedom in 2-D—one angle and two translations—and six in 3-D—three rotational and three translational parameters. For any \(\mathbf{x}_1,\mathbf{x}_2\),</p>
 
         <div class="math-block">
           \[
-            R(\theta)=
-            \begin{bmatrix}
-              \cos\theta & -\sin\theta\\
-              \sin\theta & \cos\theta
-            \end{bmatrix}.
+            \|\phi(\mathbf{x}_1)-\phi(\mathbf{x}_2)\|_2
+            =\|R(\mathbf{x}_1-\mathbf{x}_2)\|_2
+            =\|\mathbf{x}_1-\mathbf{x}_2\|_2.
           \]
         </div>
 
-        <h3>Affine transformation</h3>
-        <p>An affine model permits rotation, translation, anisotropic scale, and shear:</p>
+        <p>Rigid registration is a sensible model for the skull, bones, surgical instruments, or the initial alignment of two scans. It is not sufficient for soft-tissue deformation, respiration, cardiac motion, or inter-subject anatomical variation.</p>
+
+        <h3>Similarity and affine transformations</h3>
+        <p>A similarity transform adds one uniform scale \(s&gt;0\) to rigid motion, \(\phi(\mathbf{x})=sR\mathbf{x}+\mathbf{t}\). It preserves angles and relative shape but changes every length by the same factor.</p>
+
+        <p>An affine model is more general. It permits rotation, translation, anisotropic scale, and shear:</p>
 
         <div class="math-block">
           \[
@@ -248,10 +356,26 @@
           \]
         </div>
 
-        <p>Unlike a rigid map, an affine map need not preserve lengths, angles, or volume. Its local volume ratio is constant and equal to \(\lvert\det A\rvert\).</p>
+        <p>The matrix \(A\) can be understood as a composition of simpler linear operations. A useful conceptual factorization is \(A=RSH\), where \(R\) rotates, \(S\) scales along selected axes, and \(H\) shears. The factorization is convention-dependent, but it emphasizes that an arbitrary affine matrix mixes several physical effects.</p>
 
-        <h3>Deformable transformation</h3>
-        <p>Local anatomical motion is commonly represented as an identity map plus a displacement field \(\mathbf{u}\):</p>
+        <p>Unlike a rigid map, an affine map need not preserve lengths, angles, or volume. Parallel lines remain parallel, and its local volume ratio is constant everywhere: \(\lvert\det A\rvert\). Thus \(\lvert\det A\rvert=1\) preserves global volume, a value greater than one expands it, and a value between zero and one contracts it. A negative determinant also includes a reflection, which is usually anatomically inappropriate.</p>
+
+        <div class="article-table-wrap">
+          <table class="article-table">
+            <thead><tr><th>Model</th><th>2-D parameters</th><th>3-D parameters</th><th>Preserves</th></tr></thead>
+            <tbody>
+              <tr><td>Translation</td><td>2</td><td>3</td><td>Distances, angles, orientation, volume</td></tr>
+              <tr><td>Rigid</td><td>3</td><td>6</td><td>Distances, angles, orientation, volume</td></tr>
+              <tr><td>Similarity</td><td>4</td><td>7</td><td>Angles and relative shape</td></tr>
+              <tr><td>Affine</td><td>6</td><td>12</td><td>Straightness, parallelism, ratios on a line</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Why deformable transformations are different</h3>
+        <p>Every global model above applies one parameter set to the entire image. Soft anatomy does not behave that way: the heart wall contracts locally, lungs slide against the pleura, and inter-patient organs differ by more than a single global scale. A deformable—or nonrigid—transformation therefore allows the motion to vary with position.</p>
+
+        <p>The most direct representation is an identity map plus a displacement field \(\mathbf{u}\):</p>
 
         <div class="math-block">
           \[
@@ -260,7 +384,15 @@
           \]
         </div>
 
-        <p>A dense field assigns one displacement vector per location. A parametric free-form deformation instead interpolates a coarser lattice of control-point coefficients \(\mathbf{c}_{\mathbf{k}}\). For a tensor-product B-spline basis \(B\),</p>
+        <p>At each point \(\mathbf{x}\), the vector \(\mathbf{u}(\mathbf{x})\) specifies how far and in which direction that point is mapped. A constant displacement field reduces to translation. A field that varies linearly can reproduce affine motion. A genuinely nonlinear field lets neighboring regions move by different amounts.</p>
+
+        <h4>Dense displacement fields</h4>
+        <p>A dense field stores a \(d\)-component vector at every voxel. It can represent fine local motion and is the common output of convolutional registration networks. Its flexibility is also its weakness: neighboring vectors can change abruptly unless the model, loss, or parameterization enforces plausible spatial behavior.</p>
+
+        <p>A typical smoothness prior penalizes spatial derivatives, but smoothness alone does not guarantee invertibility. A field may look visually smooth while still folding space where its Jacobian determinant becomes non-positive.</p>
+
+        <h4>B-spline free-form deformations</h4>
+        <p>A parametric free-form deformation stores coefficients on a coarser control-point lattice and interpolates the dense displacement between them. For a tensor-product B-spline basis \(B_r\),</p>
 
         <div class="math-block">
           \[
@@ -271,10 +403,14 @@
           \]
         </div>
 
-        <p>where \(h_j\) is the control-point spacing and \(r\) the spline degree. A coarser lattice reduces degrees of freedom and builds smoothness into the model, but may miss small structures. A finer lattice is more expressive but requires stronger regularization.</p>
+        <p>Here \(h_j\) is the control-point spacing, \(r\) is the spline degree, and each coefficient \(\mathbf{c}_{\mathbf{k}}\) moves one control point. B-splines have local support: changing one coefficient influences only a neighborhood rather than the entire image. This makes optimization efficient and gives direct control over deformation scale.</p>
+
+        <p>Control-point spacing acts as an implicit regularizer. A coarse lattice produces broad, smooth motion but may miss small structures. A fine lattice captures local detail but introduces more degrees of freedom and a greater risk of fitting noise. Multiresolution methods often begin with a coarse lattice and progressively refine it.</p>
 
         <h3>Diffeomorphic transformation</h3>
-        <p>A diffeomorphism is differentiable, bijective, and has a differentiable inverse. One construction integrates a time-varying velocity field \(\mathbf{v}_t\):</p>
+        <p>A displacement field does not automatically define a one-to-one map. If two regions map to the same location or if the field folds, anatomical correspondence becomes ambiguous. A diffeomorphism addresses this by requiring the transformation to be differentiable, bijective, and to have a differentiable inverse.</p>
+
+        <p>One construction treats deformation as continuous motion generated by a time-varying velocity field \(\mathbf{v}_t\):</p>
 
         <div class="math-block">
           \[
@@ -286,7 +422,22 @@
           \]
         </div>
 
-        <p>This flow-based view is valuable when correspondence must remain invertible and preserve topology.</p>
+        <p>The point starts at \(\mathbf{x}\) when \(t=0\) and follows the velocity field until \(t=1\). Under suitable smoothness conditions, the intermediate maps remain invertible, so topology is preserved throughout the flow. If the velocity is constant in time, \(\mathbf{v}_t=\mathbf{v}\), the final transform is often written \(\phi=\exp(\mathbf{v})\) and can be approximated numerically using scaling and squaring.</p>
+
+        <h3>Combining global and local alignment</h3>
+        <p>Deformable registration is rarely expected to solve a large initial misalignment by itself. A common pipeline estimates a rigid or affine map first and then refines it with a local deformation. If \(T_{\mathrm{global}}\) is the initial map and \(\phi_{\mathrm{local}}\) is the refinement, the composite map is</p>
+
+        <div class="math-block">
+          \[
+            \phi_{\mathrm{total}}
+            =\phi_{\mathrm{local}}\circ T_{\mathrm{global}},
+            \qquad
+            \phi_{\mathrm{total}}(\mathbf{x})
+            =\phi_{\mathrm{local}}\!\left(T_{\mathrm{global}}(\mathbf{x})\right).
+          \]
+        </div>
+
+        <p>The composition order must match the coordinate convention and implementation. Writing the order explicitly is one of the simplest ways to prevent a registration pipeline from applying a correct transformation in the wrong space.</p>
       </section>
 
       <section id="warping">
