@@ -52,3 +52,33 @@ const observer = new IntersectionObserver(entries => {
 }, { rootMargin: '-30% 0px -60% 0px' });
 
 sections.forEach(section => observer.observe(section));
+
+const revealGroups = [
+  ['.section-heading', 0],
+  ['.timeline-item', 90],
+  ['.experience', 80],
+  ['.publication', 75],
+  ['.blog-note', 0]
+];
+
+const revealElements = revealGroups.flatMap(([selector, stagger]) =>
+  [...document.querySelectorAll(selector)].map((element, index) => {
+    element.classList.add('scroll-reveal');
+    element.style.setProperty('--reveal-delay', `${(index % 4) * stagger}ms`);
+    return element;
+  })
+);
+
+if ('IntersectionObserver' in window) {
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('revealed');
+      revealObserver.unobserve(entry.target);
+    });
+  }, { threshold:0.12, rootMargin:'0px 0px -40px' });
+
+  revealElements.forEach(element => revealObserver.observe(element));
+} else {
+  revealElements.forEach(element => element.classList.add('revealed'));
+}
