@@ -53,6 +53,37 @@ const observer = new IntersectionObserver(entries => {
 
 sections.forEach(section => observer.observe(section));
 
+const articleToc = document.querySelector('.article-toc-sticky');
+const articleTocLinks = articleToc ? [...articleToc.querySelectorAll('a[href^="#"]')] : [];
+const articleSections = articleTocLinks
+  .map(link => document.getElementById(link.hash.slice(1)))
+  .filter(Boolean);
+
+const setActiveArticleSection = sectionId => {
+  articleTocLinks.forEach(link => {
+    const active = link.hash === `#${sectionId}`;
+    link.classList.toggle('active', active);
+    if (active) {
+      link.setAttribute('aria-current', 'location');
+      link.scrollIntoView({ block:'nearest', inline:'nearest' });
+    } else {
+      link.removeAttribute('aria-current');
+    }
+  });
+};
+
+if (articleSections.length && 'IntersectionObserver' in window) {
+  const articleObserver = new IntersectionObserver(entries => {
+    const visible = entries
+      .filter(entry => entry.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    if (visible[0]) setActiveArticleSection(visible[0].target.id);
+  }, { rootMargin:'-15% 0px -72% 0px', threshold:0 });
+
+  articleSections.forEach(section => articleObserver.observe(section));
+  setActiveArticleSection(articleSections[0].id);
+}
+
 const revealGroups = [
   ['.section-heading', 0],
   ['.timeline-item', 90],
