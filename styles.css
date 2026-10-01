@@ -115,12 +115,15 @@ h1 { margin:11px 0 25px; color:var(--heading); font-size:clamp(1.75rem,6vw,4rem)
 /* Long-form articles */
 .article-page { background-size:5px 5px; }
 .article-shell { width:calc(100% - var(--page-gutter) - var(--page-gutter)); max-width:720px; margin-inline:auto; }
+.article-layout { width:calc(100% - var(--page-gutter) - var(--page-gutter)); max-width:1260px; margin-inline:auto; display:grid; grid-template-columns:minmax(210px,250px) minmax(0,720px) minmax(210px,250px); gap:20px; align-items:start; }
+.article-layout .article-shell { width:100%; }
+.article-layout-spacer { min-width:0; }
 .article-header { padding:74px 0 44px; border-bottom:3px double var(--line); }
 .article-kicker { margin:0 0 13px; color:var(--blue); font-size:.78rem; font-weight:bold; letter-spacing:.18em; text-transform:uppercase; }
 .article-header h1 { margin:0 0 22px; white-space:normal; font-size:clamp(2.35rem,6vw,4rem); line-height:1.07; }
 .article-deck { max-width:680px; margin:0 0 24px; color:var(--muted); font-size:1.12rem; line-height:1.65; }
 .article-byline { display:flex; flex-wrap:wrap; gap:7px 18px; color:var(--muted); font-size:.84rem; font-weight:600; }
-.article-body { padding:45px 0 90px; font-size:1.02rem; line-height:1.8; }
+.article-body { padding:45px 0 90px; font-size:calc(1.02rem + 1px); line-height:1.8; }
 .article-introduction { margin:0 0 35px; padding:20px 22px; color:var(--ink); background:transparent; border-left:3px solid var(--blue); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
 .article-introduction p:last-child { margin-bottom:0; }
 .source-note { margin:0 0 35px; padding:18px 21px; background:var(--soft); border-left:3px solid var(--blue); color:var(--muted); font-size:.91rem; }
@@ -131,6 +134,9 @@ h1 { margin:11px 0 25px; color:var(--heading); font-size:clamp(1.75rem,6vw,4rem)
 .article-toc ol { margin:0; padding-left:21px; columns:2; column-gap:34px; }
 .article-toc li { break-inside:avoid; padding:3px 0; color:var(--blue); font-size:.9rem; }
 .article-toc a:hover { text-decoration:underline; }
+.article-toc-sticky { position:sticky; top:96px; max-height:calc(100vh - 116px); margin:45px 0 0; padding:20px 18px; overflow-y:auto; }
+.article-toc-sticky ol { columns:1; padding-left:19px; }
+.article-toc-sticky li { padding:2px 0; font-size:.82rem; line-height:1.42; }
 .article-body > section { margin-top:68px; padding-top:4px; scroll-margin-top:94px; }
 .article-body > section + section { padding-top:62px; border-top:1px solid var(--line); }
 .article-body h2 { margin:0 0 22px; color:var(--heading); font-size:clamp(1.85rem,5vw,2.65rem); line-height:1.18; letter-spacing:-.02em; }
@@ -141,7 +147,7 @@ h1 { margin:11px 0 25px; color:var(--heading); font-size:clamp(1.75rem,6vw,4rem)
 .article-body ul,.article-body ol { margin:0 0 20px; padding-left:24px; }
 .article-body li { margin-bottom:7px; }
 .article-body code { padding:1px 5px; background:var(--soft); border:1px solid var(--line); font-family:Consolas,monospace; font-size:.82em; }
-.math-block { margin:22px 0; padding:12px 20px; overflow-x:auto; background:transparent; border:0; border-left:3px solid var(--accent); }
+.math-block { margin:22px 0; padding:12px 20px; overflow-x:auto; background:transparent; border:0; border-left:3px solid var(--accent); font-size:1.02rem; }
 .math-block p:last-child { margin-bottom:0; }
 .math-block mjx-container,
 .math-block mjx-container[display="true"],
@@ -241,6 +247,17 @@ h1 { margin:11px 0 25px; color:var(--heading); font-size:clamp(1.75rem,6vw,4rem)
   .concept-grid { grid-template-columns:1fr; }
   .tree-branches { grid-template-columns:1fr; }
   .tree-branches::before { display:none; }
+}
+@media (max-width:1180px) {
+  .article-layout { max-width:720px; grid-template-columns:minmax(0,1fr); gap:0; }
+  .article-layout .article-shell { width:100%; }
+  .article-toc-sticky { position:static; max-height:none; margin:36px 0 0; overflow:visible; }
+  .article-toc-sticky ol { columns:2; }
+  .article-layout-spacer { display:none; }
+}
+@media (max-width:760px) {
+  .article-layout { width:calc(100% - var(--page-gutter) - var(--page-gutter)); }
+  .article-toc-sticky ol { columns:1; }
 }
 @media (max-width:380px) {
   :root { --page-gutter:13px; }

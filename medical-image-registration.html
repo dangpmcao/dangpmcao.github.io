@@ -44,12 +44,8 @@
       <div class="article-byline"><span>By Cao Pham Minh Dang</span><time datetime="2026-10-01">October 1, 2026</time><span>30 min read</span></div>
     </header>
 
-    <article class="article-body article-shell">
-      <div class="article-introduction">
-        <p>I write this blog because I find medical image registration so diverse and so difficult to learn them all. Each paper uses a different method, each book describes the registration in a different way. Credits to <cite>Tutorial — Medical Image Registration</cite> by V. A. Zimmer, H. Qiu, and V. Sideri-Lampretsa (WBIR 2022).</p>
-      </div>
-
-      <nav class="article-toc" aria-label="Article contents">
+    <div class="article-layout">
+      <nav class="article-toc article-toc-sticky" aria-label="Article contents">
         <h2>Contents</h2>
         <ol>
           <li><a href="#what-is-registration">What Is Image Registration?</a></li><li><a href="#four-layer-model">The Four-Layer Mental Model</a></li>
@@ -61,6 +57,11 @@
           <li><a href="#example-3">Example 3: B-Spline</a></li>
         </ol>
       </nav>
+
+      <article class="article-body article-shell">
+      <div class="article-introduction">
+        <p>I write this blog because I find medical image registration so diverse and so difficult to learn them all. Each paper uses a different method, each book describes the registration in a different way. Credits to <cite>Tutorial — Medical Image Registration</cite> by V. A. Zimmer, H. Qiu, and V. Sideri-Lampretsa (WBIR 2022).</p>
+      </div>
 
       <section id="what-is-registration">
         <h2><span class="section-number">01 / FOUNDATIONS</span>What Is Image Registration?</h2>
@@ -212,7 +213,9 @@
         <h2><span class="section-number">SOURCE</span>Primary Material</h2><ol><li>Zimmer, V. A., Qiu, H., and Sideri-Lampretsa, V. <cite>Tutorial — Medical Image Registration</cite>. WBIR Tutorial, 2022. <a class="text-link" href="Tutorial@WBIR_final.pdf">Read the PDF</a>.</li></ol>
         <a class="back-home" href="index.html#blogs"><span aria-hidden="true">←</span> Back to all blogs</a>
       </section>
-    </article>
+      </article>
+      <div class="article-layout-spacer" aria-hidden="true"></div>
+    </div>
   </main>
   <footer class="article-footer">© 2026 Cao Pham Minh Dang</footer>
   <script src="script.js"></script>
