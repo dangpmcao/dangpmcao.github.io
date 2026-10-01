@@ -3,17 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A mathematical introduction to medical image registration, image geometry, warping, evaluation, and deformation quality.">
-  <title>Medical Image Registration: Geometry, Warping, and Evaluation — Cao Pham Minh Dang</title>
+  <meta name="description" content="A four-layer framework for understanding medical image registration, from representations and transformations to objectives and optimizers.">
+  <title>A Four-Layer Framework for Medical Image Registration — Cao Pham Minh Dang</title>
   <link rel="icon" href="img/book-logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sugina-dev/latin-modern-web@1.0.1/style/latinmodern-roman.css">
   <link rel="stylesheet" href="styles.css">
   <script>
     window.MathJax = {
       tex: {
-        inlineMath: [['\\(', '\\)']],
-        displayMath: [['\\[', '\\]']],
-        tags: 'ams'
+        inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], tags: 'ams',
+        macros: { R: '\\mathbb{R}', T: '\\mathcal{T}', Loss: '\\mathcal{L}', fixed: 'I_F', moving: 'I_M', sdf: '\\operatorname{SDF}' }
       },
       options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
     };
@@ -24,24 +23,14 @@
   <header class="site-header">
     <nav class="nav shell" aria-label="Main navigation">
       <a class="identity" href="index.html#home" aria-label="Cao Pham Minh Dang — home">
-        <img src="img/FB_IMG_1734459189949.jpg" alt="Cao Pham Minh Dang" width="40" height="40">
-        <span>Cao Pham Minh Dang</span>
+        <img src="img/FB_IMG_1734459189949.jpg" alt="Cao Pham Minh Dang" width="40" height="40"><span>Cao Pham Minh Dang</span>
       </a>
       <div class="nav-actions">
-        <div class="nav-links" id="nav-links">
-          <a href="index.html#home">Home</a>
-          <a href="index.html#education">Education</a>
-          <a href="index.html#research">Research</a>
-          <a href="index.html#publications">Publications</a>
-          <a class="active" href="index.html#blogs">Blogs</a>
-        </div>
-        <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links">
-          <span></span><span></span><span></span><span class="sr-only">Open menu</span>
-        </button>
+        <div class="nav-links" id="nav-links"><a href="index.html#home">Home</a><a href="index.html#education">Education</a><a href="index.html#research">Research</a><a href="index.html#publications">Publications</a><a class="active" href="index.html#blogs">Blogs</a></div>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links"><span></span><span></span><span></span><span class="sr-only">Open menu</span></button>
         <button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
           <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
-          <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
-          <span class="theme-label">Dark</span>
+          <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg><span class="theme-label">Dark</span>
         </button>
       </div>
     </nav>
@@ -50,713 +39,181 @@
   <main>
     <header class="article-header article-shell">
       <p class="article-kicker">Medical Image Analysis · Foundations</p>
-      <h1>Medical Image Registration: Geometry, Warping, and Evaluation</h1>
-      <p class="article-deck">A mathematical route from physical coordinates to deformation fields—and from a visually plausible alignment to evidence that the registration is actually trustworthy.</p>
-      <div class="article-byline">
-        <span>By Cao Pham Minh Dang</span>
-        <time datetime="2026-10-01">October 1, 2026</time>
-        <span>24 min read</span>
-      </div>
+      <h1>A Four-Layer Framework for Understanding Medical Image Registration</h1>
+      <p class="article-deck">From rigid motion and ICP to signed-distance fields, B-splines, and diffeomorphic registration.</p>
+      <div class="article-byline"><span>By Cao Pham Minh Dang</span><time datetime="2026-10-01">October 1, 2026</time><span>30 min read</span></div>
     </header>
 
     <article class="article-body article-shell">
-      <aside class="source-note" aria-label="Primary source citation">
-        <strong>Primary source.</strong> This article begins from V. A. Zimmer, H. Qiu, and V. Sideri-Lampretsa, <cite>Tutorial — Medical Image Registration</cite>, WBIR 2022. <a href="Tutorial@WBIR_final.pdf">Read the tutorial PDF</a>. The notation and explanations below are my synthesis and expansion of its geometry, warping, and evaluation material.
-      </aside>
+      <div class="article-introduction">
+        <p>I write this blog because I find medical image registration so diverse and so difficult to learn them all. Each paper uses a different method, each book describes the registration in a different way. Credits to <cite>Tutorial — Medical Image Registration</cite> by V. A. Zimmer, H. Qiu, and V. Sideri-Lampretsa (WBIR 2022).</p>
+      </div>
 
       <nav class="article-toc" aria-label="Article contents">
         <h2>Contents</h2>
         <ol>
-          <li><a href="#definition">Definition and purpose</a></li>
-          <li><a href="#formulation">Registration as an optimization problem</a></li>
-          <li><a href="#geometry">Image geometry</a></li>
-          <li><a href="#transformations">Spatial transformations</a></li>
-          <li><a href="#warping">Interpolation and warping</a></li>
-          <li><a href="#evaluation">Evaluating registration</a></li>
-          <li><a href="#deformation">Deformation properties</a></li>
-          <li><a href="#checklist">Practical checklist</a></li>
+          <li><a href="#what-is-registration">What Is Image Registration?</a></li><li><a href="#four-layer-model">The Four-Layer Mental Model</a></li>
+          <li><a href="#layer-1">Layer 1: Representation</a></li><li><a href="#layer-2">Layer 2: Transformations</a></li>
+          <li><a href="#layer-3">Layer 3: Objectives</a></li><li><a href="#layer-4">Layer 4: Optimizers</a></li>
+          <li><a href="#icp">ICP Across the Layers</a></li><li><a href="#sdf-versus-icp">SDF Registration Versus ICP</a></li>
+          <li><a href="#taxonomy">Registration Taxonomy</a></li><li><a href="#transform-taxonomy">Transformation Taxonomy</a></li>
+          <li><a href="#example-1">Example 1: Rigid ICP</a></li><li><a href="#example-2">Example 2: Multi-Label SDF</a></li>
+          <li><a href="#example-3">Example 3: B-Spline</a></li>
         </ol>
       </nav>
 
-      <section id="definition">
-        <h2><span class="section-number">01 / DEFINITION</span>What is medical image registration?</h2>
-        <p>Medical image registration estimates a spatial correspondence between two or more images. One image is designated the <em>fixed</em> image \(F\), and another the <em>moving</em> image \(M\). Registration seeks a transformation \(\phi\) that maps locations in the fixed-image domain \(\Omega_F\) to anatomically corresponding locations in the moving-image domain \(\Omega_M\):</p>
-
-        <div class="math-block">
-          \[
-            \phi : \Omega_F \subset \mathbb{R}^{d} \longrightarrow \Omega_M \subset \mathbb{R}^{d},
-            \qquad \mathbf{x} \longmapsto \phi(\mathbf{x}).
-          \]
-        </div>
-
-        <p>The registered—or warped—moving image is therefore the composition</p>
-
-        <div class="math-block">
-          \[
-            (M \circ \phi)(\mathbf{x}) = M\!\left(\phi(\mathbf{x})\right).
-          \]
-        </div>
-
-        <div class="definition">
-          <strong>The central goal:</strong> after registration, \(F(\mathbf{x})\) and \(M(\phi(\mathbf{x}))\) should describe the same anatomical location, even if the scans differ in time, viewpoint, patient, or imaging modality.
-        </div>
-
-        <p>This correspondence enables longitudinal disease monitoring, multimodal fusion such as CT–MRI or MR–ultrasound, motion estimation, atlas construction, population analysis, image-guided intervention, and label propagation. The required transformation depends on the application: aligning two rigid bones is different from estimating respiratory motion or inter-patient brain morphology.</p>
+      <section id="what-is-registration">
+        <h2><span class="section-number">01 / FOUNDATIONS</span>What Is Image Registration?</h2>
+        <p>Image registration estimates a spatial transformation that brings a <em>moving</em> image or geometry into alignment with a <em>fixed</em> image or geometry.</p>
+        <p>Let</p><div class="math-block">\[\fixed:\Omega_F\to\R,\qquad \moving:\Omega_M\to\R\]</div>
+        <p>be fixed and moving images. A transformation</p><div class="math-block">\[\T_\theta:\Omega_M\to\Omega_F\]</div>
+        <p>with parameters \(\theta\) maps coordinates from the moving domain to the fixed domain. The abstract registration problem is</p>
+        <div class="math-block">\[\boxed{\theta^*=\operatorname*{arg\,min}_{\theta}\Loss\!\left(F,\,M\circ\T_\theta^{-1}\right)}.\]</div>
+        <p>Here \(F\) and \(M\) need not be raw images: they may be intensities, masks, signed-distance fields, landmarks, point clouds, or learned features.</p>
+        <p>The central difficulty is that familiar terms from registration papers belong to different conceptual levels:</p>
+        <ul><li><strong>SDF</strong> describes a representation of a segmentation.</li><li><strong>Rigid, affine, B-spline, and diffeomorphic</strong> describe transformation models.</li><li><strong>Dice, NCC, mutual information, and Chamfer distance</strong> describe objectives or similarity measures.</li><li><strong>Adam, L-BFGS, Powell, and SVD</strong> describe optimization or solution strategies.</li><li><strong>ICP</strong> combines correspondence estimation, an objective, and an iterative solver.</li></ul>
+        <p>This motivates the four-layer framework used throughout this article.</p>
       </section>
 
-      <section id="formulation">
-        <h2><span class="section-number">02 / FORMULATION</span>Registration as an inverse problem</h2>
-        <p>A standard intensity-based method chooses \(\phi\) from an admissible transformation space \(\Phi\) by minimizing an energy with a data term and a regularizer:</p>
-
-        <div class="math-block">
-          \[
-            \phi^{\star}
-            = \operatorname*{arg\,min}_{\phi \in \Phi}
-            \underbrace{\mathcal{D}\!\left(F, M \circ \phi\right)}_{\text{image dissimilarity}}
-            + \lambda
-            \underbrace{\mathcal{R}(\phi)}_{\text{deformation prior}}.
-            \tag{1}
-          \]
+      <section id="four-layer-model">
+        <h2><span class="section-number">02 / MENTAL MODEL</span>The Four-Layer Mental Model</h2>
+        <p>A useful way to understand almost any registration method is to ask four questions in order:</p>
+        <div class="registration-flow" aria-label="Four-layer registration framework">
+          <div><strong>Layer 1: Representation / Registration Signal</strong><span>What information is being matched?</span></div><span aria-hidden="true">↓</span>
+          <div><strong>Layer 2: Transformation Model</strong><span>How may the moving object move or deform?</span></div><span aria-hidden="true">↓</span>
+          <div><strong>Layer 3: Matching Objective / Similarity Metric</strong><span>How is alignment quality measured?</span></div><span aria-hidden="true">↓</span>
+          <div><strong>Layer 4: Optimizer / Solver</strong><span>How are the best parameters found?</span></div>
         </div>
-
-        <p>The data term asks whether the aligned images agree; the regularizer asks whether the transformation is plausible. The weight \(\lambda\) expresses a real trade-off. A weak prior may fit noise or artifacts, while an overly strong prior may erase true anatomical motion.</p>
-
-        <p>Feature-based registration replaces dense image comparison with corresponding structures. For paired landmarks \(\{(\mathbf{p}_i,\mathbf{q}_i)\}_{i=1}^{N}\), for example, a natural objective is</p>
-
-        <div class="math-block">
-          \[
-            \mathcal{D}_{\mathrm{landmark}}(\phi)
-            = \frac{1}{N}\sum_{i=1}^{N}
-              \left\|\phi(\mathbf{p}_i)-\mathbf{q}_i\right\|_2^2.
-          \]
-        </div>
-
-        <p>Modern learning-based systems may predict \(\phi\) in one network pass, but the geometric meaning of the output and the evaluation requirements remain the same.</p>
+        <div class="math-block">\[\boxed{\text{Representation}\rightarrow\text{Transformation}\rightarrow\text{Objective}\rightarrow\text{Optimizer}}\]</div>
+        <p>A registration method can therefore be specified as a tuple:</p><div class="math-block">\[\boxed{(\text{signal},\ \text{transform},\ \text{metric},\ \text{solver})}.\]</div>
+        <p>For example, \((\text{multi-label SDF},\ \text{rigid},\ \text{SDF loss},\ \text{L-BFGS})\), or \((\text{surface points},\ \text{rigid},\ \text{nearest-point distance},\ \text{ICP/SVD})\).</p>
       </section>
 
-      <section id="geometry">
-        <h2><span class="section-number">03 / IMAGE GEOMETRY</span>From voxel indices to physical space</h2>
-
-        <h3>Continuous anatomy, discrete measurements</h3>
-        <p>An idealized \(d\)-dimensional medical image is a continuous function \(I:\Omega\to\mathbb{R}^{c}\), where \(c=1\) for a scalar image and \(c&gt;1\) for multichannel data. A scanner stores samples on a finite lattice:</p>
-
-        <div class="math-block">
-          \[
-            I[\mathbf{n}], \qquad
-            \mathbf{n}=(n_1,\ldots,n_d)^\top,
-            \quad 0 \le n_k < N_k.
-          \]
-        </div>
-
-        <p>The array index \(\mathbf{n}\) is not itself a physical location. Medical images carry metadata describing the origin \(\mathbf{o}\), voxel spacing \(\mathbf{s}\), and orientation matrix \(D\). With \(S=\operatorname{diag}(s_1,\ldots,s_d)\), the index-to-world mapping is</p>
-
-        <div class="math-block">
-          \[
-            \mathbf{x}_{\mathrm{world}}
-            = \mathbf{o} + D S\mathbf{n}.
-            \tag{2}
-          \]
-          \[
-            \mathbf{n}
-            = S^{-1}D^{-1}(\mathbf{x}_{\mathrm{world}}-\mathbf{o}).
-            \tag{3}
-          \]
-        </div>
-
-        <p>For an orthonormal direction matrix, \(D^{-1}=D^\top\). Equations (2)–(3) explain why two arrays of equal shape are not necessarily aligned: they may have different spacing, origins, or anatomical axes. Ignoring this metadata silently changes the physical problem.</p>
-
-        <h3>Homogeneous coordinates</h3>
-        <p>Translation is not linear in ordinary coordinates. By appending a \(1\), affine mappings become a single matrix multiplication:</p>
-
-        <div class="math-block">
-          \[
-            \widetilde{\mathbf{x}}=
-            \begin{bmatrix}\mathbf{x}\\1\end{bmatrix},
-            \qquad
-            \widetilde{\mathbf{x}}'
-            =
-            \underbrace{
-            \begin{bmatrix}
-              A & \mathbf{t}\\
-              \mathbf{0}^{\top} & 1
-            \end{bmatrix}}_{T}
-            \widetilde{\mathbf{x}}.
-            \tag{4}
-          \]
-        </div>
-
-        <p>This representation also makes coordinate conversion explicit. If \(W_F\) and \(W_M\) map fixed and moving voxel indices into world coordinates, and \(T_W\) is defined in world space, the fixed-index to moving-index map is</p>
-
-        <div class="math-block">
-          \[
-            T_{F\rightarrow M}^{\mathrm{index}}
-            = W_M^{-1}\,T_W\,W_F.
-            \tag{5}
-          \]
-        </div>
-
-        <p>The order matters: matrix composition reads from right to left. Equation (5) first enters physical space, applies the physical transform, and then returns to the moving-image lattice.</p>
-
-        <h3>Normalized coordinates</h3>
-        <p>Many deep-learning samplers use coordinates normalized to \([-1,1]^d\). Under the common corner-aligned convention, an index \(n_k\in[0,N_k-1]\) becomes</p>
-
-        <div class="math-block">
-          \[
-            \xi_k = 2\frac{n_k}{N_k-1}-1,
-            \qquad
-            n_k = \frac{N_k-1}{2}(\xi_k+1).
-          \]
-        </div>
-
-        <p>Libraries differ in whether normalized endpoints refer to voxel centers or image corners. A half-voxel convention mismatch can introduce a systematic registration error even when the learned deformation is otherwise correct.</p>
+      <section id="layer-1">
+        <h2><span class="section-number">03 / LAYER 1</span>Representation / Registration Signal</h2>
+        <div class="definition"><strong>Layer 1 asks:</strong> What information from the fixed and moving data is actually used to establish alignment?</div>
+        <h3>Intensity-Based Registration</h3>
+        <p>Intensity-based methods operate directly on voxel or pixel values:</p><div class="math-block">\[F(x)=I_F(x),\qquad M(x)=I_M(x).\]</div>
+        <p>Typical applications include CT–CT, MRI–MRI, PET–CT, and sometimes CT–MRI or CT–US when a suitable multimodal metric is used. For a transformed moving image,</p><div class="math-block">\[I_M^T(x)=I_M\!\left(T^{-1}(x)\right),\]</div>
+        <p>registration compares \(I_F(x)\) with \(I_M^T(x)\) over a region of interest. This avoids segmentation or landmark extraction, but multimodal cases are difficult because intensities need not share the same physical meaning.</p>
+        <h3>Feature-Based Registration</h3>
+        <p>Feature-based registration extracts a representation \(f(I)\) from each image and registers those features instead of raw intensity. Examples include anatomical landmarks, keypoints, edges, contours, vessel bifurcations, surfaces, segmentation masks, signed-distance fields, and learned feature maps.</p>
+        <div class="math-block">\[\boxed{\text{Registration signal}\in\{\text{intensity-based},\ \text{feature/geometry-based}\}}\]</div>
+        <p>Segmentation-, landmark-, and surface-based registration are commonly treated as subclasses of feature-based registration, although terminology varies.</p>
+        <h3>Segmentation Masks</h3>
+        <p>A binary segmentation mask is \(M(x)\in\{0,1\}\). For multiple labels,</p><div class="math-block">\[M_c(x)\in\{0,1\},\qquad c\in\mathcal C,\]</div>
+        <p>where \(\mathcal C\) might contain the LV, RV, LA, RA, and myocardium. Registration may optimize a mask-based objective such as Dice, or convert masks to smoother representations such as SDFs.</p>
+        <h3>Signed-Distance Fields (SDFs)</h3>
+        <p>Given a segmented region \(\Omega\) with boundary \(\partial\Omega\), a signed-distance field is commonly defined as</p>
+        <div class="math-block">\[\phi(x)=\sdf(x)=\begin{cases}-d(x,\partial\Omega),&x\in\Omega,\\0,&x\in\partial\Omega,\\+d(x,\partial\Omega),&x\notin\Omega,\end{cases}\qquad d(x,\partial\Omega)=\min_{y\in\partial\Omega}\|x-y\|_2.\]</div>
+        <p>The sign convention may be reversed, but the geometry is unchanged: each point stores its distance to the surface. Unlike a binary mask, an SDF supplies a spatially smooth boundary signal even when two masks do not overlap.</p>
+        <div class="math-block">\[\widetilde\phi(x)=\frac{\operatorname{clip}(\phi(x),-d_{\max},d_{\max})}{d_{\max}}.\]</div>
+        <p>For example, \(d_{\max}=15\,\mathrm{mm}\) limits the influence of very distant voxels.</p>
+        <h3>Surfaces and Point Clouds</h3><p>A segmentation can be converted to a surface and sampled as a point cloud:</p><div class="math-block">\[S=\partial\Omega,\qquad P=\{p_1,\ldots,p_N\}\subset\R^3.\]</div><p>This representation is natural for ICP, Chamfer-distance registration, and point-to-plane optimization.</p>
+        <h3>Landmarks</h3><p>For corresponding landmarks \(Q=\{q_i\}_{i=1}^N\) and \(P=\{p_i\}_{i=1}^N\), registration may minimize</p><div class="math-block">\[\Loss(T)=\sum_{i=1}^{N}\|p_i-T(q_i)\|_2^2.\]</div><p>Unlike ICP, the correspondence \(q_i\leftrightarrow p_i\) is already known.</p>
+        <h3>Learned Features</h3><p>A neural feature extractor \(f_\psi\) may map images into feature space:</p><div class="math-block">\[F(x)=f_\psi(I_F)(x),\qquad M(x)=f_\psi(I_M)(x).\]</div><p>This is useful when appearance varies strongly across modalities.</p>
       </section>
 
-      <section id="transformations">
-        <h2><span class="section-number">04 / TRANSFORMATIONS</span>Global and local motion models</h2>
-
-        <p>A transformation model determines which kinds of anatomical change the registration is allowed to express. This choice is not merely computational: it is an assumption about the anatomy. If the model is too restrictive, real motion remains unexplained. If it is too flexible, the optimizer may manufacture implausible correspondences that improve image similarity.</p>
-
-        <div class="concept-grid" aria-label="Transformation model overview">
-          <div class="concept-card">
-            <h4>Translation</h4>
-            <p>Changes position only. Shape, orientation, distance, and volume are preserved.</p>
-          </div>
-          <div class="concept-card">
-            <h4>Rigid</h4>
-            <p>Combines translation and rotation. Appropriate when the object should not deform.</p>
-          </div>
-          <div class="concept-card">
-            <h4>Affine</h4>
-            <p>Adds global scaling and shear. Straight lines remain straight, but shape may change.</p>
-          </div>
-          <div class="concept-card">
-            <h4>Deformable</h4>
-            <p>Allows position-dependent motion. Different anatomical regions can move differently.</p>
-          </div>
-        </div>
-
-        <h3>Translation: the simplest motion</h3>
-        <p>A translation moves every point by the same vector \(\mathbf{t}\). In \(d\) dimensions,</p>
-
-        <div class="math-block">
-          \[
-            \phi_{\mathrm{trans}}(\mathbf{x})=\mathbf{x}+\mathbf{t},
-            \qquad
-            \mathbf{t}=(t_1,\ldots,t_d)^\top.
-          \]
-        </div>
-
-        <p>For a 2-D image, \(\mathbf{t}=(t_x,t_y)^\top\); for a 3-D volume, \(\mathbf{t}=(t_x,t_y,t_z)^\top\). The same displacement is applied at every location, so the vector between any two transformed points is unchanged:</p>
-
-        <div class="math-block">
-          \[
-            \phi(\mathbf{x}_1)-\phi(\mathbf{x}_2)
-            =(\mathbf{x}_1+\mathbf{t})-(\mathbf{x}_2+\mathbf{t})
-            =\mathbf{x}_1-\mathbf{x}_2.
-          \]
-        </div>
-
-        <p>This equality explains why translation preserves distances, angles, shape, and volume. Its inverse is simply \(\phi^{-1}(\mathbf{x})=\mathbf{x}-\mathbf{t}\). Translation is often estimated first—for example, by aligning image centers or centers of mass—because a large initial offset can prevent later optimization from finding the correct overlap.</p>
-
-        <p>The units of \(\mathbf{t}\) must be explicit. A shift of three voxels is not a shift of three millimeters unless the voxel spacing is exactly \(1\,\mathrm{mm}\). For anisotropic volumes, the same index displacement can represent different physical distances along different axes.</p>
-
-        <h3>Rotation: changing orientation</h3>
-        <p>A rotation changes orientation while preserving lengths and handedness. In 2-D, a counterclockwise rotation by angle \(\theta\) about the origin is</p>
-
-        <div class="math-block">
-          \[
-            R(\theta)=
-            \begin{bmatrix}
-              \cos\theta & -\sin\theta\\
-              \sin\theta & \cos\theta
-            \end{bmatrix},
-            \qquad
-            \phi_{\mathrm{rot}}(\mathbf{x})=R(\theta)\mathbf{x}.
-          \]
-        </div>
-
-        <p>The constraints \(R^\top R=I\) and \(\det R=1\) are what make \(R\) a proper rotation. Orthogonality gives \(\|R\mathbf{x}\|_2=\|\mathbf{x}\|_2\), while the positive determinant excludes reflections. The inverse is especially simple: \(R^{-1}=R^\top=R(-\theta)\).</p>
-
-        <p>Three-dimensional rotation has three degrees of freedom. Rotations about the coordinate axes can be written as</p>
-
-        <div class="math-block">
-          \[
-            R_x(\alpha)=
-            \begin{bmatrix}
-              1&0&0\\
-              0&\cos\alpha&-\sin\alpha\\
-              0&\sin\alpha&\cos\alpha
-            \end{bmatrix},
-            \quad
-            R_y(\beta)=
-            \begin{bmatrix}
-              \cos\beta&0&\sin\beta\\
-              0&1&0\\
-              -\sin\beta&0&\cos\beta
-            \end{bmatrix},
-          \]
-          \[
-            R_z(\gamma)=
-            \begin{bmatrix}
-              \cos\gamma&-\sin\gamma&0\\
-              \sin\gamma&\cos\gamma&0\\
-              0&0&1
-            \end{bmatrix}.
-          \]
-        </div>
-
-        <p>A composite Euler rotation might be defined as \(R=R_z(\gamma)R_y(\beta)R_x(\alpha)\). The convention must be documented because 3-D rotations do not commute: in general, \(R_xR_y\ne R_yR_x\). Changing the multiplication order changes the final orientation.</p>
-
-        <h3>The center of rotation</h3>
-        <p>Applying \(R\mathbf{x}\) rotates about the coordinate origin, which is often a corner or scanner-defined point rather than the center of the anatomy. To rotate about a chosen center \(\mathbf{c}\), first move that center to the origin, rotate, and move it back:</p>
-
-        <div class="math-block">
-          \[
-            \phi_{\mathbf{c}}(\mathbf{x})
-            =R(\mathbf{x}-\mathbf{c})+\mathbf{c}
-            =R\mathbf{x}+(I-R)\mathbf{c}.
-          \]
-        </div>
-
-        <p>This is why initialization matters. Even with the correct angle, rotating about the wrong center produces a translation-like error whose magnitude grows with distance from the center.</p>
-
-        <h3>Rigid transformation: rotation plus translation</h3>
-        <p>A rigid transformation combines the two motions while preserving the Euclidean distance between every pair of points:</p>
-
-        <div class="math-block">
-          \[
-            \phi(\mathbf{x})=R(\mathbf{x}-\mathbf{c})+\mathbf{c}+\mathbf{t},
-            \qquad R^\top R=I,\quad \det R=1.
-            \tag{6}
-          \]
-        </div>
-
-        <p>It has three degrees of freedom in 2-D—one angle and two translations—and six in 3-D—three rotational and three translational parameters. For any \(\mathbf{x}_1,\mathbf{x}_2\),</p>
-
-        <div class="math-block">
-          \[
-            \|\phi(\mathbf{x}_1)-\phi(\mathbf{x}_2)\|_2
-            =\|R(\mathbf{x}_1-\mathbf{x}_2)\|_2
-            =\|\mathbf{x}_1-\mathbf{x}_2\|_2.
-          \]
-        </div>
-
-        <p>Rigid registration is a sensible model for the skull, bones, surgical instruments, or the initial alignment of two scans. It is not sufficient for soft-tissue deformation, respiration, cardiac motion, or inter-subject anatomical variation.</p>
-
-        <h3>Similarity and affine transformations</h3>
-        <p>A similarity transform adds one uniform scale \(s&gt;0\) to rigid motion, \(\phi(\mathbf{x})=sR\mathbf{x}+\mathbf{t}\). It preserves angles and relative shape but changes every length by the same factor.</p>
-
-        <p>An affine model is more general. It permits rotation, translation, anisotropic scale, and shear:</p>
-
-        <div class="math-block">
-          \[
-            \phi(\mathbf{x})=A\mathbf{x}+\mathbf{t},
-            \qquad A\in GL(d).
-            \tag{7}
-          \]
-        </div>
-
-        <p>The matrix \(A\) can be understood as a composition of simpler linear operations. A useful conceptual factorization is \(A=RSH\), where \(R\) rotates, \(S\) scales along selected axes, and \(H\) shears. The factorization is convention-dependent, but it emphasizes that an arbitrary affine matrix mixes several physical effects.</p>
-
-        <p>Unlike a rigid map, an affine map need not preserve lengths, angles, or volume. Parallel lines remain parallel, and its local volume ratio is constant everywhere: \(\lvert\det A\rvert\). Thus \(\lvert\det A\rvert=1\) preserves global volume, a value greater than one expands it, and a value between zero and one contracts it. A negative determinant also includes a reflection, which is usually anatomically inappropriate.</p>
-
-        <div class="article-table-wrap">
-          <table class="article-table">
-            <thead><tr><th>Model</th><th>2-D parameters</th><th>3-D parameters</th><th>Preserves</th></tr></thead>
-            <tbody>
-              <tr><td>Translation</td><td>2</td><td>3</td><td>Distances, angles, orientation, volume</td></tr>
-              <tr><td>Rigid</td><td>3</td><td>6</td><td>Distances, angles, orientation, volume</td></tr>
-              <tr><td>Similarity</td><td>4</td><td>7</td><td>Angles and relative shape</td></tr>
-              <tr><td>Affine</td><td>6</td><td>12</td><td>Straightness, parallelism, ratios on a line</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Why deformable transformations are different</h3>
-        <p>Every global model above applies one parameter set to the entire image. Soft anatomy does not behave that way: the heart wall contracts locally, lungs slide against the pleura, and inter-patient organs differ by more than a single global scale. A deformable—or nonrigid—transformation therefore allows the motion to vary with position.</p>
-
-        <p>The most direct representation is an identity map plus a displacement field \(\mathbf{u}\):</p>
-
-        <div class="math-block">
-          \[
-            \phi(\mathbf{x})=\mathbf{x}+\mathbf{u}(\mathbf{x}).
-            \tag{8}
-          \]
-        </div>
-
-        <p>At each point \(\mathbf{x}\), the vector \(\mathbf{u}(\mathbf{x})\) specifies how far and in which direction that point is mapped. A constant displacement field reduces to translation. A field that varies linearly can reproduce affine motion. A genuinely nonlinear field lets neighboring regions move by different amounts.</p>
-
-        <h4>Dense displacement fields</h4>
-        <p>A dense field stores a \(d\)-component vector at every voxel. It can represent fine local motion and is the common output of convolutional registration networks. Its flexibility is also its weakness: neighboring vectors can change abruptly unless the model, loss, or parameterization enforces plausible spatial behavior.</p>
-
-        <p>A typical smoothness prior penalizes spatial derivatives, but smoothness alone does not guarantee invertibility. A field may look visually smooth while still folding space where its Jacobian determinant becomes non-positive.</p>
-
-        <h4>B-spline free-form deformations</h4>
-        <p>A parametric free-form deformation stores coefficients on a coarser control-point lattice and interpolates the dense displacement between them. For a tensor-product B-spline basis \(B_r\),</p>
-
-        <div class="math-block">
-          \[
-            \mathbf{u}(\mathbf{x})
-            = \sum_{\mathbf{k}} \mathbf{c}_{\mathbf{k}}
-              \prod_{j=1}^{d} B_{r}\!\left(\frac{x_j}{h_j}-k_j\right),
-            \tag{9}
-          \]
-        </div>
-
-        <p>Here \(h_j\) is the control-point spacing, \(r\) is the spline degree, and each coefficient \(\mathbf{c}_{\mathbf{k}}\) moves one control point. B-splines have local support: changing one coefficient influences only a neighborhood rather than the entire image. This makes optimization efficient and gives direct control over deformation scale.</p>
-
-        <p>Control-point spacing acts as an implicit regularizer. A coarse lattice produces broad, smooth motion but may miss small structures. A fine lattice captures local detail but introduces more degrees of freedom and a greater risk of fitting noise. Multiresolution methods often begin with a coarse lattice and progressively refine it.</p>
-
-        <h3>Diffeomorphic transformation</h3>
-        <p>A displacement field does not automatically define a one-to-one map. If two regions map to the same location or if the field folds, anatomical correspondence becomes ambiguous. A diffeomorphism addresses this by requiring the transformation to be differentiable, bijective, and to have a differentiable inverse.</p>
-
-        <p>One construction treats deformation as continuous motion generated by a time-varying velocity field \(\mathbf{v}_t\):</p>
-
-        <div class="math-block">
-          \[
-            \frac{\partial \phi_t(\mathbf{x})}{\partial t}
-            = \mathbf{v}_t\!\left(\phi_t(\mathbf{x})\right),
-            \qquad \phi_0(\mathbf{x})=\mathbf{x},
-            \qquad \phi=\phi_1.
-            \tag{10}
-          \]
-        </div>
-
-        <p>The point starts at \(\mathbf{x}\) when \(t=0\) and follows the velocity field until \(t=1\). Under suitable smoothness conditions, the intermediate maps remain invertible, so topology is preserved throughout the flow. If the velocity is constant in time, \(\mathbf{v}_t=\mathbf{v}\), the final transform is often written \(\phi=\exp(\mathbf{v})\) and can be approximated numerically using scaling and squaring.</p>
-
-        <h3>Combining global and local alignment</h3>
-        <p>Deformable registration is rarely expected to solve a large initial misalignment by itself. A common pipeline estimates a rigid or affine map first and then refines it with a local deformation. If \(T_{\mathrm{global}}\) is the initial map and \(\phi_{\mathrm{local}}\) is the refinement, the composite map is</p>
-
-        <div class="math-block">
-          \[
-            \phi_{\mathrm{total}}
-            =\phi_{\mathrm{local}}\circ T_{\mathrm{global}},
-            \qquad
-            \phi_{\mathrm{total}}(\mathbf{x})
-            =\phi_{\mathrm{local}}\!\left(T_{\mathrm{global}}(\mathbf{x})\right).
-          \]
-        </div>
-
-        <p>The composition order must match the coordinate convention and implementation. Writing the order explicitly is one of the simplest ways to prevent a registration pipeline from applying a correct transformation in the wrong space.</p>
+      <section id="layer-2">
+        <h2><span class="section-number">04 / LAYER 2</span>Transformation Models</h2>
+        <div class="definition"><strong>Layer 2 asks:</strong> What spatial changes are allowed?</div>
+        <h3>Translation-Only Registration</h3><div class="math-block">\[T(x)=x+t,\qquad t=\begin{bmatrix}t_x&t_y&t_z\end{bmatrix}^{\!T}.\]</div><p>In 3D, translation has \(\boxed{3\ \text{DOF}}\).</p>
+        <h3>Rigid Registration</h3><div class="math-block">\[\boxed{T(x)=Rx+t},\qquad R\in SO(3),\quad R^TR=I,\quad\det(R)=1,\quad t\in\R^3.\]</div>
+        <p>A common parameterization is \(\theta=(\theta_x,\theta_y,\theta_z,t_x,t_y,t_z)\), giving \(\boxed{6\ \text{DOF}}\). Rigid motion preserves lengths, angles, shape, and scale; every point receives the same global transform.</p>
+        <h4>Rotation matrices</h4><div class="math-block">\[R_x(\alpha)=\begin{bmatrix}1&0&0\\0&\cos\alpha&-\sin\alpha\\0&\sin\alpha&\cos\alpha\end{bmatrix},\quad R_y(\beta)=\begin{bmatrix}\cos\beta&0&\sin\beta\\0&1&0\\-\sin\beta&0&\cos\beta\end{bmatrix},\]</div>
+        <div class="math-block">\[R_z(\gamma)=\begin{bmatrix}\cos\gamma&-\sin\gamma&0\\\sin\gamma&\cos\gamma&0\\0&0&1\end{bmatrix},\qquad R=R_z(\gamma)R_y(\beta)R_x(\alpha).\]</div><p>Rotation order must always be stated because matrix multiplication is not commutative.</p>
+        <h3>Similarity Registration</h3><div class="math-block">\[T(x)=sRx+t.\]</div><p>Three rotations, three translations, and one global scale give \(\boxed{7\ \text{DOF}}\).</p>
+        <h3>Affine Registration</h3><div class="math-block">\[\boxed{T(x)=Ax+t},\qquad A\in\R^{3\times3}.\]</div><p>A full 3D affine transform has nine matrix parameters plus three translations, or \(\boxed{12\ \text{DOF}}\). It permits translation, rotation, isotropic and anisotropic scaling, and shear.</p><div class="math-block">\[\boxed{\text{translation}\subset\text{rigid}\subset\text{similarity}\subset\text{affine}}.\]</div>
+        <h3>Deformable / Non-Rigid Registration</h3><div class="math-block">\[\boxed{T(x)=x+u(x)},\qquad u(x)=\begin{bmatrix}u_x(x)\\u_y(x)\\u_z(x)\end{bmatrix}.\]</div><p>Unlike a rigid or affine transform, a displacement field allows different locations to move differently.</p>
+        <h3>B-Spline Free-Form Deformation</h3><p>B-spline registration is a <em>transformation model</em>, not a metric or optimizer. Put control-point displacements \(\Phi_{ijk}\in\R^3\) on a lattice and interpolate them:</p><div class="math-block">\[\boxed{u(x,y,z)=\sum_{i,j,k}B_i(x)B_j(y)B_k(z)\Phi_{ijk}},\qquad T(x)=x+u(x).\]</div><p>Cubic B-splines provide local control and smoothness. Coarse control-point spacing produces smooth, low-frequency deformation; a fine grid adds local flexibility but increases the risk of overfitting or unrealistic deformation.</p>
+        <h3>Dense Displacement Fields</h3><div class="math-block">\[T(x)=x+u(x),\qquad u(x)\in\R^3\ \text{for every voxel }x.\]</div><p>This is a very high-dimensional model and usually needs smoothness regularization.</p>
+        <h3>Optical Flow</h3><p>Optical flow estimates spatially varying motion, often under brightness constancy:</p><div class="math-block">\[I(x,t)\approx I(x+u(x),t+1).\]</div>
+        <h3>Demons Registration</h3><div class="math-block">\[u_{k+1}=u_k+\Delta u_k.\]</div><p>Demons methods iteratively estimate an update and smooth or regularize the field. Variants include classical, symmetric, and diffeomorphic Demons.</p>
+        <h3>Diffeomorphic Registration</h3><p>A diffeomorphic transformation is smooth and invertible with a smooth inverse. A common local condition is</p><div class="math-block">\[\boxed{\det J_T(x)>0},\]</div><p>which discourages folding and supports topology-preserving deformation. Important families include LDDMM, SyN, stationary velocity field methods, and diffeomorphic Demons.</p>
+        <h3>LDDMM</h3><p>Large Deformation Diffeomorphic Metric Mapping models a time-dependent flow:</p><div class="math-block">\[\frac{d\phi_t(x)}{dt}=v_t(\phi_t(x)),\qquad \phi_0(x)=x.\]</div><p>The final transformation is \(\phi_1\); regularity is controlled through constraints on \(v_t\).</p>
+        <h3>SyN</h3><p>Symmetric Normalization maps both fixed and moving images toward a common intermediate space instead of assigning all deformation to only one image.</p>
       </section>
 
-      <section id="warping">
-        <h2><span class="section-number">05 / IMAGE WARPING</span>Interpolation, forward maps, and backward maps</h2>
-
-        <h3>Why interpolation is necessary</h3>
-        <p>A transformed point almost never lands exactly on a voxel center. To evaluate \(M(\mathbf{y})\) at a continuous location \(\mathbf{y}\), we reconstruct an interpolant from discrete samples:</p>
-
-        <div class="math-block">
-          \[
-            \widehat{M}(\mathbf{y})
-            = \sum_{\mathbf{n}\in\mathbb{Z}^{d}}
-              M[\mathbf{n}]\,K(\mathbf{y}-\mathbf{n}),
-            \tag{11}
-          \]
-        </div>
-
-        <p>where \(K\) is an interpolation kernel. Nearest-neighbor interpolation chooses the closest sample and is appropriate for categorical labels. Linear interpolation is usually preferable for scalar intensities. In \(d\) dimensions, multilinear interpolation is</p>
-
-        <div class="math-block">
-          \[
-            \widehat{M}(\mathbf{y})
-            = \sum_{\mathbf{b}\in\{0,1\}^{d}}
-              M[\lfloor\mathbf{y}\rfloor+\mathbf{b}]
-              \prod_{k=1}^{d}
-              \big[b_k\alpha_k+(1-b_k)(1-\alpha_k)\big],
-          \]
-          \[
-            \boldsymbol{\alpha}=\mathbf{y}-\lfloor\mathbf{y}\rfloor.
-            \tag{12}
-          \]
-        </div>
-
-        <p>Equation (12) gives bilinear interpolation in 2-D and trilinear interpolation in 3-D. Higher-order B-spline or sinc-like kernels may produce smoother results, but they are more expensive and can overshoot near sharp boundaries.</p>
-
-        <div class="article-callout">
-          <p><strong>Images and labels require different treatment.</strong> Linear interpolation of a segmentation turns class IDs into meaningless fractional values. Warp label maps with nearest-neighbor interpolation, or interpolate one-hot class probabilities and take an argmax afterward.</p>
-        </div>
-
-        <h3>Forward mapping: push</h3>
-        <p>A forward warp starts from each moving voxel and pushes its value to a transformed location:</p>
-
-        <div class="math-block">
-          \[
-            \mathbf{y}=\psi(\mathbf{x}),
-            \qquad M[\mathbf{x}] \longrightarrow I_{\mathrm{out}}[\mathbf{y}].
-          \]
-        </div>
-
-        <p>Because transformed samples are irregularly spaced, several sources may collide and some output voxels may receive nothing. Forward warping therefore needs <em>splatting</em>, accumulation rules, and hole filling.</p>
-
-        <h3>Backward mapping: pull</h3>
-        <p>A backward warp visits every output location \(\mathbf{y}\) and asks where its value came from:</p>
-
-        <div class="math-block">
-          \[
-            I_{\mathrm{out}}(\mathbf{y})
-            = \widehat{M}\!\left(\psi^{-1}(\mathbf{y})\right).
-            \tag{13}
-          \]
-        </div>
-
-        <p>Registration is often defined directly as a fixed-to-moving sampling map \(\phi\), in which case</p>
-
-        <div class="math-block">
-          \[
-            M_{\mathrm{warped}}(\mathbf{x})
-            = \widehat{M}\!\left(\phi(\mathbf{x})\right),
-            \qquad \mathbf{x}\in\Omega_F.
-            \tag{14}
-          \]
-        </div>
-
-        <p>This is the usual implementation because every fixed-grid voxel receives one sampled value. A common source of mistakes is confusing the conceptual direction of anatomical motion with the direction of the sampling map.</p>
-
-        <h3>Resample once</h3>
-        <p>Every interpolation modifies the signal. If several transforms are required, compose their coordinate maps first and resample the original image once:</p>
-
-        <div class="math-block">
-          \[
-            M \circ \phi_1 \circ \phi_2
-            \quad\text{in one sampling operation, rather than}\quad
-            (M\circ\phi_1)\circ\phi_2.
-          \]
-        </div>
-
-        <p>This reduces cumulative blurring and preserves quantitative intensity information.</p>
+      <section id="layer-3">
+        <h2><span class="section-number">05 / LAYER 3</span>Matching Objectives and Similarity Metrics</h2>
+        <div class="definition"><strong>Layer 3 asks:</strong> Given a candidate transformation, how do we quantify whether the alignment is good?</div>
+        <h3>Sum of Squared Differences / Mean Squared Error</h3><div class="math-block">\[\Loss_{SSD}(T)=\sum_{x\in\Omega}\left[I_F(x)-I_M(T^{-1}(x))\right]^2,\qquad \Loss_{MSE}(T)=\frac{1}{|\Omega|}\Loss_{SSD}(T).\]</div><p>These metrics assume corresponding structures have comparable intensities.</p>
+        <h3>Normalized Cross-Correlation</h3><div class="math-block">\[\operatorname{NCC}(F,M)=\frac{\sum_x(F(x)-\bar F)(M(x)-\bar M)}{\sqrt{\sum_x(F(x)-\bar F)^2}\sqrt{\sum_x(M(x)-\bar M)^2}}.\]</div><p>Registration maximizes NCC or minimizes \(-\operatorname{NCC}\). Local NCC applies the same idea over windows and is more robust to spatially varying intensity changes.</p>
+        <h3>Mutual Information</h3><div class="math-block">\[\operatorname{MI}(F,M)=H(F)+H(M)-H(F,M)=\sum_{f,m}p(f,m)\log\frac{p(f,m)}{p(f)p(m)}.\]</div><p>MI measures statistical dependence instead of numerical equality, making it useful for multimodal registration.</p>
+        <h3>Dice Similarity</h3><div class="math-block">\[\operatorname{Dice}(A,B)=\frac{2|A\cap B|}{|A|+|B|},\qquad \Loss_{Dice}=1-\operatorname{Dice}.\]</div><p>Dice is intuitive for overlap but gives a weak signal when masks begin far apart and do not overlap.</p>
+        <h3>SDF Loss</h3><div class="math-block">\[\boxed{\Loss_{SDF}(T)=\frac{1}{|\Omega|}\sum_{x\in\Omega}\left[\phi_F(x)-\phi_M(T^{-1}(x))\right]^2}.\]</div><p>The distance fields may first be clipped and normalized. For multiple structures,</p><div class="math-block">\[\boxed{\Loss_{multi}(T)=\sum_{c\in\mathcal C}w_c\Loss_c(T)},\qquad w_c=\frac{1}{|\mathcal C|}.\]</div><p>Balanced weights stop a large structure such as the LV from dominating a smaller atrium merely because it contains more voxels.</p>
+        <h3>Point-to-Point Distance</h3><div class="math-block">\[\Loss_{p2p}(T)=\sum_i\|p_i-T(q_i)\|_2^2.\]</div><p>This is the classical rigid ICP objective after correspondence assignment.</p>
+        <h3>Point-to-Plane Distance</h3><div class="math-block">\[\boxed{\Loss_{p2pl}(T)=\sum_i\left[n_i^T(T(q_i)-p_i)\right]^2}.\]</div><p>It penalizes error along each fixed point’s local surface normal instead of the full Euclidean distance.</p>
+        <h3>Chamfer Distance</h3><div class="math-block">\[D_{Chamfer}(P,Q)=\frac{1}{|P|}\sum_{p\in P}\min_{q\in Q}\|p-q\|_2^2+\frac{1}{|Q|}\sum_{q\in Q}\min_{p\in P}\|q-p\|_2^2.\]</div><p>The symmetric Chamfer distance penalizes mismatch in both directions.</p>
+        <h3>Hausdorff Distance</h3><div class="math-block">\[D_H(P,Q)=\max\left\{\sup_{p\in P}\inf_{q\in Q}\|p-q\|,\sup_{q\in Q}\inf_{p\in P}\|q-p\|\right\}.\]</div><p>It measures the worst mismatch and is consequently more sensitive to outliers than average surface distances.</p>
       </section>
 
-      <section id="evaluation">
-        <h2><span class="section-number">06 / EVALUATION</span>How do we know the registration is correct?</h2>
-        <p>A low training objective is not proof of anatomical correctness. Evaluation should be independent of the features or similarity term used to optimize the registration, and it should measure errors that matter for the intended application.</p>
-
-        <h3>Anatomical landmarks and corresponding points</h3>
-        <p>Suppose experts mark corresponding points \(\mathbf{p}_i\) in the fixed image and \(\mathbf{q}_i\) in the moving image. The target registration error (TRE) is</p>
-
-        <div class="math-block">
-          \[
-            \operatorname{TRE}_i
-            = \left\|\phi(\mathbf{p}_i)-\mathbf{q}_i\right\|_2,
-            \qquad
-            \operatorname{mTRE}
-            = \frac{1}{N}\sum_{i=1}^{N}\operatorname{TRE}_i.
-            \tag{15}
-          \]
-        </div>
-
-        <p>Report the distribution—not only its mean. The median, standard deviation, 95th percentile, and maximum expose catastrophic local failures. Coordinates must be expressed in physical units, usually millimeters.</p>
-
-        <p>Landmarks should cover the volume and the clinically relevant regions. Sparse or easily identifiable points may overstate performance elsewhere. Inter-observer annotation variability supplies a useful lower bound on interpretable TRE.</p>
-
-        <h3>Independent image similarity</h3>
-        <p>For monomodal images, mean squared error and normalized cross-correlation (NCC) are common:</p>
-
-        <div class="math-block">
-          \[
-            \operatorname{MSE}(F,M_\phi)
-            = \frac{1}{|\Omega|}\sum_{\mathbf{x}\in\Omega}
-              \left(F(\mathbf{x})-M_\phi(\mathbf{x})\right)^2,
-          \]
-          \[
-            \operatorname{NCC}(F,M_\phi)
-            =
-            \frac{\sum_{\mathbf{x}}(F(\mathbf{x})-\bar F)(M_\phi(\mathbf{x})-\bar M_\phi)}
-            {\sqrt{\sum_{\mathbf{x}}(F(\mathbf{x})-\bar F)^2}
-             \sqrt{\sum_{\mathbf{x}}(M_\phi(\mathbf{x})-\bar M_\phi)^2}}.
-            \tag{16}
-          \]
-        </div>
-
-        <p>For multimodal images, mutual information measures statistical dependence. From a joint intensity distribution \(p_{FM}\),</p>
-
-        <div class="math-block">
-          \[
-            \operatorname{MI}(F,M_\phi)
-            = \sum_{f,m}p_{FM}(f,m)
-              \log\frac{p_{FM}(f,m)}{p_F(f)p_M(m)}.
-            \tag{17}
-          \]
-        </div>
-
-        <p>If NCC, MI, or another measure was optimized during registration, reporting the same measure as the sole evaluation is circular. Use a held-out metric, landmarks, labels, or downstream task performance.</p>
-
-        <h3>Segmentation-label overlap</h3>
-        <p>Let \(A\) be a fixed-image anatomical label and \(B_\phi\) the corresponding warped moving label. The Dice similarity coefficient and Jaccard index are</p>
-
-        <div class="math-block">
-          \[
-            \operatorname{Dice}(A,B_\phi)
-            = \frac{2|A\cap B_\phi|}{|A|+|B_\phi|},
-            \qquad
-            \operatorname{Jaccard}(A,B_\phi)
-            = \frac{|A\cap B_\phi|}{|A\cup B_\phi|}.
-            \tag{18}
-          \]
-        </div>
-
-        <p>Overlap is easy to interpret but size-dependent: a small displacement can severely reduce Dice for a tiny structure while barely affecting a large organ. Boundary metrics complement it. With surface point sets \(S_A\) and \(S_B\), the symmetric average surface distance is</p>
-
-        <div class="math-block">
-          \[
-            \operatorname{ASSD}(S_A,S_B)
-            = \frac{
-              \sum_{a\in S_A}\min_{b\in S_B}\|a-b\|_2
-              +\sum_{b\in S_B}\min_{a\in S_A}\|b-a\|_2}
-            {|S_A|+|S_B|}.
-            \tag{19}
-          \]
-        </div>
-
-        <p>The Hausdorff distance measures the worst boundary disagreement, although a robust 95th-percentile Hausdorff distance is usually less sensitive to a single mislabeled voxel.</p>
-
-        <h3>Deformation-field quality</h3>
-        <p>Good overlap can coexist with an implausible deformation. The field itself should therefore be audited using inverse consistency, derivative-based smoothness, Jacobian determinants, folding counts, and displacement magnitudes. These quantities are developed next.</p>
-
-        <div class="article-table-wrap">
-          <table class="article-table">
-            <thead><tr><th>Question</th><th>Useful measures</th><th>Main limitation</th></tr></thead>
-            <tbody>
-              <tr><td>Are known points aligned?</td><td>TRE, median TRE, 95th-percentile TRE</td><td>Landmarks are sparse and observer-dependent.</td></tr>
-              <tr><td>Do images agree?</td><td>NCC, MI, held-out descriptors</td><td>Image similarity is not necessarily anatomical accuracy.</td></tr>
-              <tr><td>Do structures overlap?</td><td>Dice, Jaccard, ASSD, HD95</td><td>Depends on structure size and label quality.</td></tr>
-              <tr><td>Is the warp plausible?</td><td>Jacobian statistics, folding rate, inverse consistency</td><td>Plausibility does not guarantee correct correspondence.</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <section id="layer-4">
+        <h2><span class="section-number">06 / LAYER 4</span>Optimizers and Solvers</h2>
+        <div class="definition"><strong>Layer 4 asks:</strong> How do we find the transformation parameters that optimize the chosen objective?</div>
+        <h3>Gradient Descent</h3><div class="math-block">\[\theta_{k+1}=\theta_k-\eta\nabla_\theta\Loss(\theta_k),\]</div><p>where \(\eta\) is the learning rate.</p>
+        <h3>Adam</h3><p>Adam maintains moving estimates of the gradient’s first and second moments. It is common in differentiable registration pipelines and neural registration models.</p>
+        <h3>L-BFGS</h3><p>L-BFGS is a quasi-Newton optimizer that approximates curvature from a limited history of gradient updates. It is often effective for smooth objectives with a moderate number of parameters.</p>
+        <h3>Powell and Derivative-Free Search</h3><p>Powell’s method does not need analytical gradients. Derivative-free methods are useful when interpolation, resampling, or metric computation makes gradients difficult or unreliable.</p>
+        <h3>Gauss–Newton and Levenberg–Marquardt</h3><p>For nonlinear least squares,</p><div class="math-block">\[\Loss(\theta)=\tfrac12\|r(\theta)\|^2,\qquad H\approx J^TJ,\]</div><p>where \(J\) is the residual Jacobian. Levenberg–Marquardt adds damping:</p><div class="math-block">\[(J^TJ+\lambda I)\Delta\theta=-J^Tr.\]</div>
+        <h3>Closed-Form SVD for Rigid Point Matching</h3><p>For paired point sets \((q_i,p_i)\), first compute and subtract the centroids:</p><div class="math-block">\[\bar q=\frac1N\sum_iq_i,\quad \bar p=\frac1N\sum_ip_i,\qquad \widetilde q_i=q_i-\bar q,\quad \widetilde p_i=p_i-\bar p.\]</div><p>Construct the cross-covariance and take its singular value decomposition:</p><div class="math-block">\[H=\sum_i\widetilde q_i\widetilde p_i^T,\qquad H=U\Sigma V^T.\]</div><p>After correcting a reflection if necessary,</p><div class="math-block">\[\boxed{R=VU^T},\qquad\boxed{t=\bar p-R\bar q}.\]</div><p>This single solve estimates all six rigid degrees of freedom jointly from all correspondences.</p>
       </section>
 
-      <section id="deformation">
-        <h2><span class="section-number">07 / DEFORMATION QUALITY</span>Consistency, smoothness, volume, and topology</h2>
-
-        <h3>Consistency</h3>
-        <p>If \(\phi\) maps fixed to moving and \(\psi\) maps moving to fixed, ideal inverse consistency requires</p>
-
-        <div class="math-block">
-          \[
-            \psi\circ\phi=\operatorname{Id}_{\Omega_F},
-            \qquad
-            \phi\circ\psi=\operatorname{Id}_{\Omega_M}.
-          \]
-        </div>
-
-        <p>A measurable inverse-consistency error is</p>
-
-        <div class="math-block">
-          \[
-            \mathcal{E}_{\mathrm{IC}}
-            = \frac{1}{|\Omega_F|}
-              \sum_{\mathbf{x}\in\Omega_F}
-              \left\|\psi(\phi(\mathbf{x}))-\mathbf{x}\right\|_2^2.
-            \tag{20}
-          \]
-        </div>
-
-        <p>Cycle consistency can be extended across multiple images or time points. For transformations \(\phi_{A\to B}\), \(\phi_{B\to C}\), and \(\phi_{C\to A}\), their composition should approximate the identity. Temporal consistency is especially important for cardiac and respiratory sequences.</p>
-
-        <h3>Smoothness</h3>
-        <p>For \(\phi(\mathbf{x})=\mathbf{x}+\mathbf{u}(\mathbf{x})\), diffusion regularization penalizes first derivatives:</p>
-
-        <div class="math-block">
-          \[
-            \mathcal{R}_{\mathrm{diff}}(\mathbf{u})
-            = \int_{\Omega}\|\nabla\mathbf{u}(\mathbf{x})\|_F^2\,d\mathbf{x}.
-            \tag{21}
-          \]
-        </div>
-
-        <p>Bending energy penalizes curvature through second derivatives:</p>
-
-        <div class="math-block">
-          \[
-            \mathcal{R}_{\mathrm{bend}}(\mathbf{u})
-            = \int_{\Omega}
-              \sum_{i=1}^{d}\sum_{j=1}^{d}\sum_{k=1}^{d}
-              \left(\frac{\partial^2 u_i}
-              {\partial x_j\partial x_k}\right)^2 d\mathbf{x}.
-            \tag{22}
-          \]
-        </div>
-
-        <p>These are priors, not universal truths. Sliding organs can have discontinuous tangential motion at interfaces; forcing global smoothness may be anatomically wrong. Smoothness must be interpreted relative to tissue mechanics and image resolution.</p>
-
-        <h3>Volume preservation and loss</h3>
-        <p>The deformation gradient and its Jacobian determinant are</p>
-
-        <div class="math-block">
-          \[
-            J_{\phi}(\mathbf{x})=\nabla\phi(\mathbf{x})
-            = I+\nabla\mathbf{u}(\mathbf{x}),
-            \qquad
-            j(\mathbf{x})=\det J_{\phi}(\mathbf{x}).
-            \tag{23}
-          \]
-        </div>
-
-        <p>The determinant describes local volume change:</p>
-
-        <ul>
-          <li>\(j(\mathbf{x})=1\): local volume is preserved.</li>
-          <li>\(0&lt;j(\mathbf{x})&lt;1\): local contraction.</li>
-          <li>\(j(\mathbf{x})&gt;1\): local expansion.</li>
-          <li>\(j(\mathbf{x})\le 0\): singularity or orientation-reversing fold.</li>
-        </ul>
-
-        <p>The change-of-variables formula makes the interpretation precise. For a region \(A\subset\Omega\),</p>
-
-        <div class="math-block">
-          \[
-            |\phi(A)|=\int_A \left|\det J_\phi(\mathbf{x})\right|d\mathbf{x}.
-            \tag{24}
-          \]
-        </div>
-
-        <p>Useful summaries include the mean and percentiles of \(\log j\), the fraction of voxels with \(j\le0\), and spatial maps of extreme expansion or contraction. Whether \(j\approx1\) is desirable depends on the anatomy: incompressible tissue suggests volume preservation, while a filling ventricle or growing lesion does not.</p>
-
-        <h3>Topology</h3>
-        <p>A topologically valid deformation should not tear tissue, glue distinct regions together, or fold space. A smooth map with</p>
-
-        <div class="math-block">
-          \[
-            \det J_\phi(\mathbf{x})>0
-            \qquad \text{for every }\mathbf{x}\in\Omega
-            \tag{25}
-          \]
-        </div>
-
-        <p>is locally orientation-preserving and locally invertible by the inverse function theorem. This is necessary for a diffeomorphism, though on its own it does not prove global one-to-one behavior. Boundary handling, global injectivity, and the numerical integration scheme also matter.</p>
-
-        <p>Topology can additionally refer to anatomical labels themselves. Connected-component counts, holes, and Euler characteristic can reveal whether a warped structure has acquired implausible breaks or handles even when its overlap score is high.</p>
+      <section id="icp">
+        <h2><span class="section-number">07 / ALGORITHM</span>ICP: Why It Does Not Fit into Only One Layer</h2>
+        <h3>Core Idea</h3><p>Iterative Closest Point registers point sets or surfaces. Classical rigid ICP alternates between estimating nearest-neighbor correspondences, solving one rigid transformation from all correspondences, applying that transformation, and repeating until convergence. Its representation is usually a point cloud or surface, while ICP itself spans the matching and solving stages.</p>
+        <h3>One ICP Iteration</h3><p>Let \(Q=\{q_1,\ldots,q_N\}\) be the moving surface, \(P=\{p_1,\ldots,p_M\}\) the fixed surface, and \(T_k(x)=R_kx+t_k\) the current transform. First transform every moving point:</p><div class="math-block">\[q_i'=T_k(q_i).\]</div><p>Then assign its closest fixed point:</p><div class="math-block">\[\boxed{p_i=\operatorname*{arg\,min}_{p\in P}\|q_i'-p\|_2}.\]</div><p>Estimate one global incremental rigid transform from all pairs:</p><div class="math-block">\[\Delta T_k=\operatorname*{arg\,min}_T\sum_i\|p_i-T(q_i')\|_2^2,\qquad \boxed{T_{k+1}=\Delta T_k\circ T_k}.\]</div>
+        <h3>How the Six DOFs Are Updated</h3><p>Rigid ICP does not give each point its own motion. Every correspondence contributes evidence about one global parameter vector:</p><div class="math-block">\[\theta=\begin{bmatrix}\theta_x&\theta_y&\theta_z&t_x&t_y&t_z\end{bmatrix}^{\!T}.\]</div><p>For point-to-plane ICP, a small-motion update uses</p><div class="math-block">\[\xi=\begin{bmatrix}\omega_x&\omega_y&\omega_z&t_x&t_y&t_z\end{bmatrix}^{\!T},\qquad r_i\approx J_i\xi-b_i.\]</div><p>Stacking all residuals gives \(J\xi\approx b\) and</p><div class="math-block">\[\boxed{\xi^*=\operatorname*{arg\,min}_\xi\|J\xi-b\|_2^2}.\]</div><p>Many points “vote” for one six-parameter motion.</p>
+        <h3>ICP Requires Good Initialization</h3><p>ICP is local. Under poor alignment, a geometrically nearest point may be anatomically wrong. Robust pipelines therefore use</p><div class="math-block">\[\boxed{\text{coarse initialization}\rightarrow\text{ICP refinement}},\]</div><p>where initialization may use centroids, PCA, landmarks, a global search, or a previous stage.</p>
+        <h3>Label-Aware ICP</h3><p>Naively merging anatomical point sets can create invalid correspondences such as \(LV_{US}\to Myocardium_{CT}\). Label-aware matching instead enforces \(LV_{US}\leftrightarrow LV_{CT}\), \(RV_{US}\leftrightarrow RV_{CT}\), and so on, while optimizing one shared transformation:</p><div class="math-block">\[\Loss(T)=\sum_{c\in\mathcal C}w_c\frac{1}{N_c}\sum_{i=1}^{N_c}d\!\left(T(q_i^c),P^c\right)^2.\]</div>
       </section>
 
-      <section id="checklist">
-        <h2><span class="section-number">08 / PRACTICE</span>A compact evaluation checklist</h2>
-        <ol>
-          <li><strong>State the map direction.</strong> Specify whether \(\phi\) maps fixed points to moving points or represents forward physical motion.</li>
-          <li><strong>Work in physical space.</strong> Respect origin, spacing, direction, and units; document any normalized-coordinate convention.</li>
-          <li><strong>Match interpolation to data.</strong> Use continuous interpolation for intensities and categorical interpolation for labels.</li>
-          <li><strong>Use independent accuracy measures.</strong> Combine landmarks, held-out image metrics, overlap, and boundary distance where possible.</li>
-          <li><strong>Inspect the full error distribution.</strong> Means hide regional and worst-case failures.</li>
-          <li><strong>Audit the deformation.</strong> Report inverse consistency, smoothness, Jacobian statistics, and folding rate.</li>
-          <li><strong>Interpret metrics anatomically.</strong> Neither perfect smoothness nor exact volume preservation is appropriate for every organ.</li>
-          <li><strong>Visualize.</strong> Inspect checkerboards, difference images, warped grids, landmark residuals, and Jacobian maps.</li>
-        </ol>
+      <section id="sdf-versus-icp">
+        <h2><span class="section-number">08 / COMPARISON</span>SDF Registration Versus ICP</h2><p>SDF registration and ICP can both use segmentation geometry, but they operate differently.</p>
+        <div class="article-table-wrap"><table class="article-table"><thead><tr><th>Aspect</th><th>SDF-based registration</th><th>ICP</th></tr></thead><tbody>
+          <tr><td>Representation</td><td>Volumetric signed-distance field</td><td>Surface or point cloud</td></tr><tr><td>Correspondence</td><td>No explicit point correspondences</td><td>Explicit nearest-neighbor correspondences</td></tr><tr><td>Typical objective</td><td>Difference between distance fields</td><td>Point-to-point or point-to-plane distance</td></tr><tr><td>Transform</td><td>Rigid, affine, B-spline, etc.</td><td>Usually rigid, though variants exist</td></tr><tr><td>Optimization</td><td>General numerical optimizer</td><td>Alternate correspondence and transform solve</td></tr><tr><td>Far from overlap</td><td>SDF still provides a graded signal</td><td>Nearest neighbors may be anatomically wrong</td></tr><tr><td>Domain</td><td>3D voxel field</td><td>Surface samples</td></tr><tr><td>Multiple labels</td><td>One SDF channel per label</td><td>Needs label-aware matching or weighting</td></tr><tr><td>Initialization</td><td>Important, but the objective can be smoother</td><td>Often highly sensitive</td></tr><tr><td>Typical role</td><td>Coarse-to-medium geometric registration</td><td>Local surface refinement</td></tr>
+        </tbody></table></div>
+        <p>A hybrid strategy can be sensible:</p><div class="math-block">\[\boxed{\begin{aligned}&\text{centroid/PCA initialization}\rightarrow\text{multi-label SDF rigid registration}\\[-1mm]&\hspace{22mm}\rightarrow\text{label-aware ICP refinement}.\end{aligned}}\]</div><p>The ICP step is optional and must be validated: a lower surface distance does not automatically mean higher Dice or better anatomical correspondence.</p>
+      </section>
 
-        <div class="definition">
-          <strong>The main lesson:</strong> registration quality is multidimensional. Image agreement, anatomical correspondence, and transformation plausibility answer different questions; a reliable study evaluates all three.
-        </div>
+      <section id="taxonomy">
+        <h2><span class="section-number">09 / TAXONOMY</span>Registration Taxonomy Beyond the Four Layers</h2><p>The four layers describe how a method is built. Registration problems are also classified along several independent axes.</p>
+        <h3>By Transformation Scope</h3><ul><li><strong>Global:</strong> one transform applies to the whole object, such as rigid or affine.</li><li><strong>Local / deformable:</strong> motion varies spatially, such as a B-spline FFD or dense field.</li></ul>
+        <h3>By Modality</h3><ul><li><strong>Mono-modal:</strong> CT–CT, MRI–MRI, or US–US.</li><li><strong>Multi-modal:</strong> CT–MRI, PET–CT, or CT–US.</li></ul>
+        <h3>By Subject</h3><ul><li><strong>Intra-subject:</strong> the same patient across times, phases, or modalities.</li><li><strong>Inter-subject:</strong> different patients.</li><li><strong>Atlas-to-subject:</strong> a population template registered to an individual.</li></ul>
+        <h3>By Dimensionality</h3><div class="math-block">\[2D\to2D,\qquad2D\to3D,\qquad3D\to3D,\qquad3D+t\ \text{or other 4D registration}.\]</div>
+        <h3>By Temporal Structure</h3><p>For a cardiac sequence \(I(x,t)\), \(t=0,\ldots,T-1\), temporal registration may estimate \(\phi_{0\to t}\) from one reference phase to every other phase. Sequential transformations compose as</p><div class="math-block">\[\boxed{\phi_{0\to2}=\phi_{1\to2}\circ\phi_{0\to1}}.\]</div>
+      </section>
+
+      <section id="transform-taxonomy">
+        <h2><span class="section-number">10 / TRANSFORMATIONS</span>A Transformation Taxonomy</h2>
+        <div class="transform-tree" role="img" aria-label="Transformation models split into global and deformable models"><div class="tree-root">Transformation models</div><div class="tree-branches"><div class="tree-branch"><strong>Global</strong><span>Translation</span><span>Rigid</span><span>Similarity</span><span>Affine</span></div><div class="tree-branch"><strong>Deformable / non-rigid</strong><span>B-spline FFD</span><span>Dense field</span><span>Demons</span><span>Diffeomorphic → LDDMM · SyN · SVF</span></div></div></div>
+        <p>Rotation and translation are low-level components of a global rigid model, while B-splines define a much richer local parameterization.</p>
+      </section>
+
+      <section id="example-1">
+        <h2><span class="section-number">11 / WORKED EXAMPLE</span>Rigid Surface Registration with ICP</h2><p>Assume a moving ultrasound surface contains points \(q_i\) and a fixed CT surface contains points \(p_j\).</p>
+        <h3>Step 1: Initialization</h3><div class="math-block">\[t_0=\bar p-\bar q,\qquad T_0(x)=x+t_0.\]</div>
+        <h3>Step 2: Correspondence Assignment</h3><div class="math-block">\[p_i=\operatorname*{arg\,min}_{p\in P}\|T_k(q_i)-p\|.\]</div>
+        <h3>Step 3: Rigid Solve</h3><div class="math-block">\[(R_\Delta,t_\Delta)=\operatorname*{arg\,min}_{R,t}\sum_i\|p_i-(RT_k(q_i)+t)\|^2.\]</div>
+        <h3>Step 4: Transform Composition</h3><div class="math-block">\[T_{k+1}=\Delta T_k\circ T_k.\]</div>
+        <h3>Step 5: Convergence</h3><div class="math-block">\[|\Loss_{k+1}-\Loss_k|<\epsilon\]</div><p>or stop when the transform update is sufficiently small. The result is still one global rigid transformation, not one transform per point.</p>
+      </section>
+
+      <section id="example-2">
+        <h2><span class="section-number">12 / WORKED EXAMPLE</span>Multi-Label SDF Rigid Registration</h2><p>Assume five classes:</p><div class="math-block">\[\mathcal C=\{LV,RV,LA,RA,Myo\}.\]</div><p>For every class, convert fixed and moving masks into normalized SDFs \(\phi_F^c\) and \(\phi_M^c\), and choose a rigid transform</p><div class="math-block">\[T_\theta(x)=R(\theta_x,\theta_y,\theta_z)x+t.\]</div><p>A balanced loss is</p><div class="math-block">\[\Loss(\theta)=\frac{1}{|\mathcal C|}\sum_{c\in\mathcal C}\frac{1}{|\Omega_c|}\sum_{x\in\Omega_c}\left[\phi_F^c(x)-\phi_M^c(T_\theta^{-1}(x))\right]^2.\]</div><p>Then solve</p><div class="math-block">\[\boxed{\theta^*=\operatorname*{arg\,min}_\theta\Loss(\theta)}\]</div><p>with L-BFGS, Powell, or another suitable optimizer. The six resulting numbers \((\theta_x,\theta_y,\theta_z,t_x,t_y,t_z)\) are applied consistently to the full ultrasound volume and every associated label.</p>
+      </section>
+
+      <section id="example-3">
+        <h2><span class="section-number">13 / WORKED EXAMPLE</span>B-Spline Deformable Registration</h2><p>Suppose the fixed and moving images are two phases of a cardiac CT sequence. Because the heart changes shape through the cardiac cycle, a rigid transform is insufficient.</p><p>Place control points \(\Phi_{ijk}\) on a 3D lattice. The displacement field and transform are</p><div class="math-block">\[u(x,y,z)=\sum_{i,j,k}B_i(x)B_j(y)B_k(z)\Phi_{ijk},\qquad T(x)=x+u(x).\]</div><p>An intensity-based objective might be</p><div class="math-block">\[\Loss(T)=-\operatorname{LNCC}\!\left(I_F,I_M\circ T^{-1}\right)+\lambda\mathcal R(u),\qquad \mathcal R(u)=\int_\Omega\|\nabla u(x)\|_F^2\,dx.\]</div><p>The same four-layer pattern remains:</p><div class="math-block">\[\boxed{\text{CT intensity}+\text{B-spline deformation}+\text{LNCC + regularization}+\text{numerical optimizer}}.\]</div>
       </section>
 
       <section class="references" id="references">
-        <h2><span class="section-number">REFERENCE</span>Primary material</h2>
-        <ol>
-          <li>Zimmer, V. A., Qiu, H., and Sideri-Lampretsa, V. <cite>Tutorial — Medical Image Registration</cite>. WBIR Tutorial, 2022. <a class="text-link" href="Tutorial@WBIR_final.pdf">PDF</a>.</li>
-        </ol>
+        <h2><span class="section-number">SOURCE</span>Primary Material</h2><ol><li>Zimmer, V. A., Qiu, H., and Sideri-Lampretsa, V. <cite>Tutorial — Medical Image Registration</cite>. WBIR Tutorial, 2022. <a class="text-link" href="Tutorial@WBIR_final.pdf">Read the PDF</a>.</li></ol>
         <a class="back-home" href="index.html#blogs"><span aria-hidden="true">←</span> Back to all blogs</a>
       </section>
     </article>
   </main>
-
   <footer class="article-footer">© 2026 Cao Pham Minh Dang</footer>
   <script src="script.js"></script>
 </body>
