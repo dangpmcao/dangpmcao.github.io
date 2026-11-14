@@ -9,6 +9,7 @@ html { scroll-padding-top:82px; scroll-behavior:smooth; }
 body { margin:0; color:var(--ink); background-color:var(--paper); background-image:radial-gradient(var(--grain) .65px,transparent .65px); background-size:5px 5px; font-family:"XCharter","Charter","Bitstream Charter","Charis SIL",Georgia,serif; font-size:17px; line-height:1.76; font-weight:400; text-rendering:optimizeLegibility; font-kerning:normal; transition:color .25s ease,background-color .25s ease; }
 a { color:inherit; text-decoration:none; }
 .shell { width:calc(100% - var(--page-gutter) - var(--page-gutter)); max-width:var(--page-width); margin-inline:auto; }
+.bg-field { position:fixed; inset:0; z-index:-1; width:100%; height:100%; pointer-events:none; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .site-header { position:sticky; top:0; z-index:20; overflow:visible; background:var(--header); border-bottom:3px double rgba(255,255,255,.38); box-shadow:0 2px 12px rgba(6,39,70,.16); }
 .site-header::before {
